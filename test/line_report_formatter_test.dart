@@ -11,15 +11,15 @@ void main() {
         id: 'case-test-1',
         startTime: now,
         squadName: '金山91',
-        location: '新竹市東區慈雲路O號',
-        patientName: '馬O倫',
+        location: '新竹市東區光復路一段O號',
+        patientName: '王O明',
         patientGender: '男',
-        patientAge: '17',
+        patientAge: '68',
         caseStory: '現場患者無意識、無呼吸、無脈搏，立即實施急救處置。',
-        medicalHistory: '精神疾病',
+        medicalHistory: '高血壓、心臟病',
         allergyHistory: '無',
-        emtNames: '金山 李心廷（T2)\n金山 張涵淇（T2)\n金山志工 湯宗達（T1)',
-        hospitalName: '國軍新竹醫院',
+        emtNames: '金山 隊員A（T2)\n金山 隊員B（T2)\n金山 志工C（T1)',
+        hospitalName: '新竹台大分院',
         patientContactTime: now,
         cprStartTime: now.add(const Duration(seconds: 15)),
         firstShockTime: now.add(const Duration(minutes: 1)),
@@ -57,13 +57,13 @@ void main() {
       expect(report, contains('1.出勤時間：9月3日20時51分'));
       expect(report, contains('2.單位：金山91'));
       expect(report, contains('3.救護類別：OHCA-救護'));
-      expect(report, contains('4.地點：新竹市東區慈雲路O號'));
-      expect(report, contains('5.患者：馬O倫，男性，17歲'));
+      expect(report, contains('4.地點：新竹市東區光復路一段O號'));
+      expect(report, contains('5.患者：王O明，男性，68歲'));
       expect(report, contains('6.案情：'));
-      expect(report, contains('7.過去病史：精神疾病。'));
+      expect(report, contains('7.過去病史：高血壓、心臟病。'));
       expect(report, contains('  過敏史：無。'));
       expect(report, contains('8.出勤人員：'));
-      expect(report, contains('金山 李心廷（T2)'));
+      expect(report, contains('金山 隊員A（T2)'));
       expect(report, contains('LUCAS 機械按壓：已使用'));
       expect(report, contains('SGA (i-gel) #4'));
       expect(report, contains('EZ-IO 骨內針'));
