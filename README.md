@@ -2,6 +2,16 @@
 
 專為**高壓、吵雜、分秒必爭之 OHCA 急救現場**設計的手機應用程式，專注於協助現場指揮官（Leader）與救護技術員（EMT）精準掌握 CPR 循環節奏、給藥時間點與下一步 ACLS 決策。
 
+
+---
+
+## 📱 App 核心畫面說明 (Screen Previews)
+
+| 1. 急救主操作與 Leader 指令卡 | 2. 捷運圖連續時間軸 (Metro Rail) | 3. 一鍵 LINE 救護報告交接 |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/01_main_active_cpr.jpg" width="260" alt="急救主操作畫面"/> | <img src="docs/screenshots/02_continuous_timeline.jpg" width="260" alt="連續圖示時間軸"/> | <img src="docs/screenshots/03_line_report_export.jpg" width="260" alt="LINE 救護通報格式"/> |
+| **金山分隊專屬主畫面**<br>• 指令驅動 CPR 2分鐘倒數<br>• 動態 ACLS 決策指引卡<br>• Epinephrine 給藥冷卻指示<br>• LUCAS、SGA、IV/IO 處置鍵 | **圖示化連續時間軸**<br>• 站點式時間軸（接觸➔CPR➔電擊➔ROSC）<br>• 急診交接儀表板（總按壓時間/Shock/Epi）<br>• 快速檢視關鍵醫療處置節點 | **新竹市工作群組通報**<br>• 符合消防局標準救護通報格式<br>• 一鍵複製至剪貼簿<br>• 包含完整急救時間鏈與統計摘要 |
+
 ---
 
 ## 🌟 核心特色 (現場指令驅動設計)
