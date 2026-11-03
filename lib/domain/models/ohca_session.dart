@@ -12,11 +12,16 @@ class OhcaSession {
   DateTime? roscTime;
   DateTime? terminationTime;
 
-  String squadName; // 新竹市消防局分隊 e.g. 光復分隊 / 三民分隊 / 特搜分隊
-  String emtNames; // 出勤同仁
+  String squadName; // e.g. 金山91
+  String emtNames; // 出勤同仁 (預設空白)
   String hospitalName; // 送往醫院 e.g. 新竹台大分院 / 馬偕紀念醫院 / 國軍新竹醫院
+  String patientName; // 患者姓名 (例如: 張O明)
   String patientGender; // 男 / 女 / 不詳
   String patientAge; // 年齡估計
+  String location; // 出勤地點 (例如: 新竹市東區慈雲路O號)
+  String caseStory; // 案情補充 (例如: 家屬表示倒地無反應...)
+  String medicalHistory; // 過去病史 (例如: 高血壓、心臟病 / 精神疾病)
+  String allergyHistory; // 過敏史 (預設: 無)
 
   String? airwaySummary; // e.g. i-gel #4 / ETT 7.5mm
   String? vascularSummary; // e.g. EZ-IO 右側近端脛骨 / IV 18G
@@ -36,11 +41,16 @@ class OhcaSession {
     this.hospitalArrivalTime,
     this.roscTime,
     this.terminationTime,
-    this.squadName = '金山分隊',
+    this.squadName = '金山91',
     this.emtNames = '',
     this.hospitalName = '新竹台大分院',
+    this.patientName = '',
     this.patientGender = '不詳',
     this.patientAge = '',
+    this.location = '',
+    this.caseStory = '',
+    this.medicalHistory = '',
+    this.allergyHistory = '無',
     this.airwaySummary,
     this.vascularSummary,
     this.isLucasUsed = false,
@@ -81,8 +91,13 @@ class OhcaSession {
         'squadName': squadName,
         'emtNames': emtNames,
         'hospitalName': hospitalName,
+        'patientName': patientName,
         'patientGender': patientGender,
         'patientAge': patientAge,
+        'location': location,
+        'caseStory': caseStory,
+        'medicalHistory': medicalHistory,
+        'allergyHistory': allergyHistory,
         'airwaySummary': airwaySummary,
         'vascularSummary': vascularSummary,
         'isLucasUsed': isLucasUsed,
@@ -115,11 +130,16 @@ class OhcaSession {
         terminationTime: json['terminationTime'] != null
             ? DateTime.parse(json['terminationTime'] as String)
             : null,
-        squadName: json['squadName'] as String? ?? '金山分隊',
+        squadName: json['squadName'] as String? ?? '金山91',
         emtNames: json['emtNames'] as String? ?? '',
         hospitalName: json['hospitalName'] as String? ?? '新竹台大分院',
+        patientName: json['patientName'] as String? ?? '',
         patientGender: json['patientGender'] as String? ?? '不詳',
         patientAge: json['patientAge'] as String? ?? '',
+        location: json['location'] as String? ?? '',
+        caseStory: json['caseStory'] as String? ?? '',
+        medicalHistory: json['medicalHistory'] as String? ?? '',
+        allergyHistory: json['allergyHistory'] as String? ?? '無',
         airwaySummary: json['airwaySummary'] as String?,
         vascularSummary: json['vascularSummary'] as String?,
         isLucasUsed: json['isLucasUsed'] as bool? ?? false,

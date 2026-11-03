@@ -4,24 +4,35 @@ import 'package:hsinchu_ohca_app/domain/models/ohca_session.dart';
 
 class LineReportFormatter {
   static final DateFormat _timeFormat = DateFormat('HH:mm:ss');
-  static final DateFormat _dateFormat = DateFormat('yyyy/MM/dd');
+  static final DateFormat _chineseDateFormat = DateFormat('M月d日HH時mm分');
 
   static String generateReport(OhcaSession session) {
     final buffer = StringBuffer();
-    final dateStr = _dateFormat.format(session.startTime);
+    final dispatchTimeStr = _chineseDateFormat.format(session.startTime);
 
-    buffer.writeln('【新竹市消防局 OHCA 現場急救紀錄】');
-    buffer.writeln('案件日期：$dateStr');
-    buffer.writeln('出勤單位：${session.squadName}');
-    if (session.emtNames.isNotEmpty) {
-      buffer.writeln('救護人員：${session.emtNames}');
+    // 1~5 項次
+    buffer.writeln('金山分隊報告');
+    buffer.writeln('1.出勤時間：$dispatchTimeStr');
+    buffer.writeln('2.單位：${session.squadName.isNotEmpty ? session.squadName : "金山91"}');
+    buffer.writeln('3.救護類別：OHCA-救護');
+    buffer.writeln('4.地點：${session.location.isNotEmpty ? session.location : "新竹市東區"}');
+
+    // 患者資訊格式化: 馬O倫，男性，17歲
+    final pName = session.patientName.isNotEmpty ? session.patientName : '患者';
+    final pGender = session.patientGender.isNotEmpty ? '${session.patientGender}性' : '性別不詳';
+    final pAge = session.patientAge.isNotEmpty ? '${session.patientAge}歲' : '年齡不詳';
+    buffer.writeln('5.患者：$pName，$pGender，$pAge');
+
+    // 6. 案情
+    buffer.writeln('6.案情：');
+    if (session.caseStory.isNotEmpty) {
+      buffer.writeln(session.caseStory);
+    } else {
+      buffer.writeln('現場患者無意識、無呼吸、無脈搏，立即實施 CPR 及各項急救處置。');
     }
-    buffer.writeln('後送醫院：${session.hospitalName}');
-    buffer.writeln(
-        '患者資訊：${session.patientGender}性 / ${session.patientAge.isEmpty ? "年齡不詳" : "${session.patientAge}歲"}');
     buffer.writeln();
 
-    buffer.writeln('【⏱️ 關鍵時間鏈】');
+    buffer.writeln('【⏱️ 現場急救處置與時間鏈】');
     if (session.patientContactTime != null) {
       buffer.writeln(
           '- 接觸患者：${_timeFormat.format(session.patientContactTime!)}');
@@ -49,7 +60,7 @@ class LineReportFormatter {
     }
     buffer.writeln();
 
-    buffer.writeln('【⚡ 處置統計與清單】');
+    buffer.writeln('【⚡ 處置統計摘要】');
     // CPR & LUCAS
     final cprDuration = (session.terminationTime ??
             session.roscTime ??
@@ -119,6 +130,25 @@ class LineReportFormatter {
     // 血管通路
     if (session.vascularSummary != null && session.vascularSummary!.isNotEmpty) {
       buffer.writeln('- 建立通路：${session.vascularSummary}');
+    }
+
+    // 送往醫院總結
+    final unitName = session.squadName.isNotEmpty ? session.squadName : '91';
+    buffer.writeln('${unitName}人員持續急救後送往${session.hospitalName}急診室交接。');
+    buffer.writeln();
+
+    // 7. 過去病史與過敏史
+    final medHist = session.medicalHistory.isNotEmpty ? session.medicalHistory : '不詳';
+    final allergyHist = session.allergyHistory.isNotEmpty ? session.allergyHistory : '無';
+    buffer.writeln('7.過去病史：$medHist。');
+    buffer.writeln('  過敏史：$allergyHist。');
+
+    // 8. 出勤人員
+    buffer.writeln('8.出勤人員：');
+    if (session.emtNames.isNotEmpty) {
+      buffer.writeln(session.emtNames);
+    } else {
+      buffer.writeln('(出勤人員未輸入)');
     }
 
     buffer.writeln();

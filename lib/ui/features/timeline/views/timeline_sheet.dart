@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:hsinchu_ohca_app/domain/models/cpr_event.dart';
 import 'package:hsinchu_ohca_app/domain/models/ohca_session.dart';
-import 'package:hsinchu_ohca_app/domain/models/rhythm_type.dart';
 import 'package:hsinchu_ohca_app/ui/core/app_colors.dart';
 
 enum TimelineFilter {

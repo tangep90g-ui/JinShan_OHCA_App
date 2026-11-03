@@ -42,7 +42,7 @@ class ActiveCprScreen extends StatelessWidget {
                   controller: squadController,
                   style: const TextStyle(color: AppColors.textPrimary),
                   decoration: const InputDecoration(
-                    labelText: '出勤分隊 (例如: 金山分隊 / 光復分隊 / 三民分隊)',
+                    labelText: '出勤單位 (預設: 金山91 / 可改金山92等)',
                     labelStyle: TextStyle(color: AppColors.textSecondary),
                     filled: true,
                     fillColor: AppColors.surfaceElevated,
@@ -141,7 +141,6 @@ class ActiveCprScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => LineExportDialog(
         session: viewModel.session,
-        reportText: viewModel.getLineReportText(),
         onCopy: () async {
           await viewModel.copyLineReportToClipboard();
         },

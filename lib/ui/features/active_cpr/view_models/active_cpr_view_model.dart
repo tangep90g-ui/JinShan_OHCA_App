@@ -63,7 +63,7 @@ class ActiveCprViewModel extends ChangeNotifier {
     _session = OhcaSession(
       id: const Uuid().v4(),
       startTime: now,
-      squadName: '金山分隊',
+      squadName: '金山91',
       patientContactTime: now,
     );
     _updateGuidance();
