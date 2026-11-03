@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import 'package:hsinchu_ohca_app/data/repositories/session_repository.dart';
 import 'package:hsinchu_ohca_app/data/services/line_report_formatter.dart';
+import 'package:hsinchu_ohca_app/data/services/metronome_service.dart';
 import 'package:hsinchu_ohca_app/data/services/tts_service.dart';
 import 'package:hsinchu_ohca_app/data/services/vibration_service.dart';
 import 'package:hsinchu_ohca_app/domain/engine/ohca_decision_engine.dart';
@@ -17,6 +18,7 @@ class ActiveCprViewModel extends ChangeNotifier {
   final SessionRepository _repository;
   final TtsService _tts = TtsService();
   final VibrationService _vibration = VibrationService();
+  final MetronomeService _metronome = MetronomeService();
 
   ActiveCprViewModel({SessionRepository? repository})
       : _repository = repository ?? SessionRepository() {
@@ -50,6 +52,7 @@ class ActiveCprViewModel extends ChangeNotifier {
 
   bool get isMuted => _tts.isMuted;
   bool get isVibrationEnabled => _vibration.isVibrationEnabled;
+  bool get isMetronomeEnabled => _metronome.isEnabled;
 
   DecisionGuidance _guidance = const DecisionGuidance(
     primaryTitle: '等待開始急救',
@@ -79,6 +82,11 @@ class ActiveCprViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleMetronome() {
+    _metronome.toggleMetronome(_isRunning && !_isPaused);
+    notifyListeners();
+  }
+
   void startCpr() {
     if (_isRunning) return;
     final now = DateTime.now();
@@ -94,6 +102,7 @@ class ActiveCprViewModel extends ChangeNotifier {
 
     _tts.speak('開始CPR，第1循環計時啟動');
     _vibration.lightFeedback();
+    _metronome.start();
 
     _startTimer();
     _updateGuidance();
@@ -103,6 +112,7 @@ class ActiveCprViewModel extends ChangeNotifier {
   void pauseCpr() {
     if (!_isRunning || _isPaused) return;
     _isPaused = true;
+    _metronome.pause();
     _addEvent(
       type: EventType.cprPause,
       title: '暫停按壓',
@@ -116,6 +126,7 @@ class ActiveCprViewModel extends ChangeNotifier {
   void resumeCpr() {
     if (!_isRunning || !_isPaused) return;
     _isPaused = false;
+    _metronome.start();
     _addEvent(
       type: EventType.cprResume,
       title: '恢復按壓',
@@ -545,9 +556,40 @@ class ActiveCprViewModel extends ChangeNotifier {
     return await _repository.getHistorySessions();
   }
 
+  /// 叫出並載入歷史存檔案件
+  Future<void> loadArchivedSession(OhcaSession archivedSession) async {
+    _timer?.cancel();
+    _isRunning = false;
+    _isPaused = false;
+    _metronome.stop();
+
+    _session = archivedSession;
+
+    // 計算總 CPR 秒數與最後循環
+    if (_session.cprStartTime != null) {
+      final endTime = _session.terminationTime ??
+          _session.roscTime ??
+          _session.hospitalArrivalTime ??
+          DateTime.now();
+      _totalElapsedSeconds = endTime.difference(_session.cprStartTime!).inSeconds;
+    } else {
+      _totalElapsedSeconds = 0;
+    }
+
+    _cycleSecondsRemaining = 0;
+    _currentCycle = _session.events
+        .map((e) => e.cycleNumber ?? 1)
+        .fold(1, (max, val) => val > max ? val : max);
+    _epiSecondsRemaining = null;
+
+    _updateGuidance();
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
+    _metronome.dispose();
     super.dispose();
   }
 }

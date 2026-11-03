@@ -5,11 +5,13 @@ import 'package:hsinchu_ohca_app/ui/core/app_colors.dart';
 class DecisionGuidanceCard extends StatelessWidget {
   final DecisionGuidance guidance;
   final VoidCallback onOpen4H4T;
+  final VoidCallback? onOpenAclsGuide;
 
   const DecisionGuidanceCard({
     super.key,
     required this.guidance,
     required this.onOpen4H4T,
+    this.onOpenAclsGuide,
   });
 
   Color _getUrgencyColor() {
@@ -89,6 +91,27 @@ class DecisionGuidanceCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
+              if (onOpenAclsGuide != null)
+                TextButton.icon(
+                  onPressed: onOpenAclsGuide,
+                  style: TextButton.styleFrom(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  icon: const Icon(Icons.menu_book_rounded,
+                      size: 15, color: AppColors.drugBlue),
+                  label: const Text(
+                    '流程指南',
+                    style: TextStyle(
+                      color: AppColors.drugBlue,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              const SizedBox(width: 4),
               TextButton.icon(
                 onPressed: onOpen4H4T,
                 style: TextButton.styleFrom(

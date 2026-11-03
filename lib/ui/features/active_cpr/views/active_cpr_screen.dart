@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hsinchu_ohca_app/ui/core/app_colors.dart';
 import 'package:hsinchu_ohca_app/ui/features/active_cpr/view_models/active_cpr_view_model.dart';
+import 'widgets/acls_flow_guide_sheet.dart';
 import 'widgets/action_keypad.dart';
 import 'widgets/airway_dialog.dart';
 import 'widgets/case_history_sheet.dart';
@@ -282,6 +283,18 @@ class ActiveCprScreen extends StatelessWidget {
     );
   }
 
+  void _showAclsFlowGuideSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => const FractionallySizedBox(
+        heightFactor: 0.92,
+        child: AclsFlowGuideSheet(),
+      ),
+    );
+  }
+
   void _showCaseHistorySheet(BuildContext context) async {
     final history = await viewModel.getHistorySessions();
     if (context.mounted) {
@@ -291,7 +304,21 @@ class ActiveCprScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         builder: (ctx) => FractionallySizedBox(
           heightFactor: 0.88,
-          child: CaseHistorySheet(sessions: history),
+          child: CaseHistorySheet(
+            sessions: history,
+            onLoadCase: (archivedSession) async {
+              await viewModel.loadArchivedSession(archivedSession);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                        '已成功叫出出勤案件！出勤時間：${archivedSession.startTime.month}月${archivedSession.startTime.day}日'),
+                    backgroundColor: AppColors.drugBlue,
+                  ),
+                );
+              }
+            },
+          ),
         ),
       );
     }
@@ -375,9 +402,26 @@ class ActiveCprScreen extends StatelessWidget {
                     case 'info':
                       _showCaseInfoDialog(context);
                       break;
+                    case 'acls':
+                      _showAclsFlowGuideSheet(context);
+                      break;
                   }
                 },
                 itemBuilder: (ctx) => [
+                  const PopupMenuItem(
+                    value: 'acls',
+                    child: Row(
+                      children: [
+                        Icon(Icons.menu_book_rounded,
+                            color: AppColors.cprGreen, size: 20),
+                        SizedBox(width: 10),
+                        Text('ACLS 急救流程指南',
+                            style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
                   const PopupMenuItem(
                     value: 'end',
                     child: Row(
@@ -434,6 +478,16 @@ class ActiveCprScreen extends StatelessWidget {
                 ],
               ),
               IconButton(
+                tooltip: viewModel.isMetronomeEnabled ? '關閉 110bpm 節拍器' : '開啟 110bpm 按壓節拍聲',
+                icon: Icon(
+                  Icons.speed_rounded,
+                  color: viewModel.isMetronomeEnabled
+                      ? AppColors.cprGreen
+                      : AppColors.textMuted,
+                ),
+                onPressed: viewModel.toggleMetronome,
+              ),
+              IconButton(
                 tooltip: viewModel.isMuted ? '解除靜音' : '靜音語音',
                 icon: Icon(
                   viewModel.isMuted ? Icons.volume_off : Icons.volume_up,
@@ -470,6 +524,8 @@ class ActiveCprScreen extends StatelessWidget {
                     epiSecondsRemaining: viewModel.epiSecondsRemaining,
                     isRunning: viewModel.isRunning,
                     isPaused: viewModel.isPaused,
+                    isMetronomeEnabled: viewModel.isMetronomeEnabled,
+                    onToggleMetronome: viewModel.toggleMetronome,
                     onStart: viewModel.startCpr,
                     onPause: viewModel.pauseCpr,
                     onResume: viewModel.resumeCpr,
@@ -479,6 +535,7 @@ class ActiveCprScreen extends StatelessWidget {
                   // 2. ACLS 動態下一步決策卡片
                   DecisionGuidanceCard(
                     guidance: viewModel.guidance,
+                    onOpenAclsGuide: () => _showAclsFlowGuideSheet(context),
                     onOpen4H4T: () {
                       showModalBottomSheet(
                         context: context,

@@ -8,11 +8,13 @@ import 'package:hsinchu_ohca_app/ui/features/timeline/views/timeline_sheet.dart'
 
 class CaseHistorySheet extends StatelessWidget {
   final List<OhcaSession> sessions;
+  final ValueChanged<OhcaSession>? onLoadCase;
   final VoidCallback? onRefresh;
 
   const CaseHistorySheet({
     super.key,
     required this.sessions,
+    this.onLoadCase,
     this.onRefresh,
   });
 
@@ -282,11 +284,99 @@ class CaseHistorySheet extends StatelessWidget {
                                       },
                                       icon: const Icon(Icons.timeline_rounded,
                                           size: 15),
-                                      label: const Text('查看時間軸',
+                                      label: const Text('時間軸',
                                           style: TextStyle(fontSize: 12)),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: 6),
+                                  // 叫出此案按鈕
+                                  if (onLoadCase != null) ...[
+                                    Expanded(
+                                      child: OutlinedButton.icon(
+                                        style: OutlinedButton.styleFrom(
+                                          foregroundColor: AppColors.drugBlue,
+                                          side: BorderSide(
+                                              color: AppColors.drugBlue
+                                                  .withValues(alpha: 0.5)),
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 8),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        onPressed: () async {
+                                          final confirmed =
+                                              await showDialog<bool>(
+                                            context: context,
+                                            builder: (dialogCtx) => AlertDialog(
+                                              backgroundColor:
+                                                  AppColors.surface,
+                                              title: const Row(
+                                                children: [
+                                                  Icon(
+                                                      Icons.unarchive_rounded,
+                                                      color:
+                                                          AppColors.drugBlue),
+                                                  SizedBox(width: 8),
+                                                  Text('叫出此案件確認',
+                                                      style: TextStyle(
+                                                          color: AppColors
+                                                              .textPrimary,
+                                                          fontSize: 16)),
+                                                ],
+                                              ),
+                                              content: Text(
+                                                '確定要將 $dateStr 的急救案件叫出並載入主畫面嗎？\n\n您可以檢視當前數據、補登處置或重新產出 LINE 報告。',
+                                                style: const TextStyle(
+                                                    color: AppColors
+                                                        .textSecondary,
+                                                    fontSize: 13),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(
+                                                          dialogCtx, false),
+                                                  child: const Text('取消'),
+                                                ),
+                                                ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                          backgroundColor:
+                                                              AppColors.drugBlue,
+                                                          foregroundColor:
+                                                              Colors.black),
+                                                  onPressed: () =>
+                                                      Navigator.pop(
+                                                          dialogCtx, true),
+                                                  child: const Text('確定叫出',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight
+                                                                  .bold)),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+
+                                          if (confirmed == true &&
+                                              context.mounted) {
+                                            Navigator.pop(context);
+                                            onLoadCase!(s);
+                                          }
+                                        },
+                                        icon: const Icon(
+                                            Icons.unarchive_rounded,
+                                            size: 15),
+                                        label: const Text('叫出案件',
+                                            style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold)),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                  ],
                                   // 複製 LINE 報告按鈕
                                   Expanded(
                                     child: ElevatedButton.icon(
@@ -304,7 +394,7 @@ class CaseHistorySheet extends StatelessWidget {
                                           _copyLineReport(context, s),
                                       icon: const Icon(Icons.copy_rounded,
                                           size: 15),
-                                      label: const Text('複製 LINE 報告',
+                                      label: const Text('LINE報告',
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,

@@ -13,6 +13,9 @@ class CprMasterTimerCard extends StatelessWidget {
   final VoidCallback onResume;
   final VoidCallback onNextCycle;
 
+  final bool isMetronomeEnabled;
+  final VoidCallback? onToggleMetronome;
+
   const CprMasterTimerCard({
     super.key,
     required this.totalElapsedSeconds,
@@ -21,6 +24,8 @@ class CprMasterTimerCard extends StatelessWidget {
     this.epiSecondsRemaining,
     required this.isRunning,
     required this.isPaused,
+    this.isMetronomeEnabled = false,
+    this.onToggleMetronome,
     required this.onStart,
     required this.onPause,
     required this.onResume,
@@ -86,41 +91,88 @@ class CprMasterTimerCard extends StatelessWidget {
               ),
 
               // Epinephrine 倒數膠囊標籤
-              if (epiSecondsRemaining != null)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: epiSecondsRemaining! <= 30
-                        ? AppColors.warningAmber.withOpacity(0.2)
-                        : AppColors.surfaceElevated,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: epiSecondsRemaining! <= 30
-                          ? AppColors.warningAmber
-                          : Colors.transparent,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.medication,
-                          size: 14, color: AppColors.drugBlue),
-                      const SizedBox(width: 4),
-                      Text(
-                        epiSecondsRemaining! > 0
-                            ? 'Epi 下劑 ${_formatTime(epiSecondsRemaining!)}'
-                            : '⚡ 可給予 Epi',
-                        style: TextStyle(
-                          color: epiSecondsRemaining! <= 30
-                              ? AppColors.warningAmber
-                              : AppColors.textPrimary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+              Row(
+                children: [
+                  if (onToggleMetronome != null)
+                    GestureDetector(
+                      onTap: onToggleMetronome,
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: isMetronomeEnabled
+                              ? AppColors.cprGreen.withValues(alpha: 0.2)
+                              : AppColors.surfaceElevated,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isMetronomeEnabled
+                                ? AppColors.cprGreen
+                                : Colors.transparent,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.speed_rounded,
+                              size: 13,
+                              color: isMetronomeEnabled
+                                  ? AppColors.cprGreen
+                                  : AppColors.textMuted,
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              '110 bpm',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: isMetronomeEnabled
+                                    ? AppColors.cprGreen
+                                    : AppColors.textMuted,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  if (epiSecondsRemaining != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: epiSecondsRemaining! <= 30
+                            ? AppColors.warningAmber.withValues(alpha: 0.2)
+                            : AppColors.surfaceElevated,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: epiSecondsRemaining! <= 30
+                              ? AppColors.warningAmber
+                              : Colors.transparent,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.medication,
+                              size: 14, color: AppColors.drugBlue),
+                          const SizedBox(width: 4),
+                          Text(
+                            epiSecondsRemaining! > 0
+                                ? 'Epi 下劑 ${_formatTime(epiSecondsRemaining!)}'
+                                : '⚡ 可給予 Epi',
+                            style: TextStyle(
+                              color: epiSecondsRemaining! <= 30
+                                  ? AppColors.warningAmber
+                                  : AppColors.textPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
 
