@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>新竹市消防局 OHCA 現場輔助 (金山分隊)</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#1A1D24">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="OHCA金山">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <style>
+    :root {
+      --bg: #0F1115;
+      --surface: #1A1D24;
+      --surface-elevated: #242832;
+      --cpr-green: #00E676;
+      --warning-amber: #FFB300;
+      --urgent-red: #FF1744;
+      --shock-purple: #7C4DFF;
+      --drug-blue: #29B6F6;
+      --rosc-cyan: #00E5FF;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B0B7C3;
+      --text-muted: #6C757D;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* 頂部導航列 */
+    header {
+      background-color: var(--surface);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--surface-elevated);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      background: rgba(255, 23, 68, 0.2);
+      color: var(--urgent-red);
+      font-size: 20px;
+      padding: 6px 8px;
+      border-radius: 8px;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-icon {
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+      border: none;
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-icon.active {
+      color: var(--cpr-green);
+    }
+
+    .btn-icon.muted {
+      color: var(--urgent-red);
+    }
+
+    /* 主容器 */
+    main {
+      flex: 1;
+      padding: 12px 14px 100px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* 1. 主計時卡片 */
+    .timer-card {
+      background-color: var(--surface);
+      border-radius: 18px;
+      padding: 16px;
+      border: 1px solid var(--surface-elevated);
+    }
+
+    .timer-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .epi-pill {
+      background: var(--surface-elevated);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--drug-blue);
+      border: 1px solid transparent;
+    }
+
+    .epi-pill.ready {
+      background: rgba(255, 179, 0, 0.2);
+      color: var(--warning-amber);
+      border-color: var(--warning-amber);
+      animation: pulse 1s infinite alternate;
+    }
+
+    .timer-display {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 14px;
+      margin: 10px 0;
+    }
+
+    .cycle-badge {
+      background: var(--surface-elevated);
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .countdown-number {
+      font-size: 60px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      color: var(--cpr-green);
+      line-height: 1;
+      transition: color 0.3s;
+    }
+
+    .progress-bar-bg {
+      background: var(--surface-elevated);
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .progress-bar-fill {
+      background: var(--cpr-green);
+      height: 100%;
+      width: 0%;
+      transition: width 1s linear, background-color 0.3s;
+    }
+
+    .timer-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-main-cpr {
+      flex: 3;
+      background: var(--cpr-green);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 17px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-pause-cpr {
+      background: var(--warning-amber);
+    }
+
+    .btn-next-cycle {
+      flex: 2;
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--text-muted);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* 2. 動態決策指引卡片 */
+    .guidance-card {
+      background: var(--surface);
+      border: 2px solid var(--cpr-green);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 0 16px rgba(0, 230, 118, 0.2);
+      transition: all 0.3s;
+    }
+
+    .guidance-card.warning {
+      border-color: var(--warning-amber);
+      box-shadow: 0 0 16px rgba(255, 179, 0, 0.25);
+    }
+
+    .guidance-card.critical {
+      border-color: var(--urgent-red);
+      box-shadow: 0 0 20px rgba(255, 23, 68, 0.4);
+      animation: pulse 1s infinite alternate;
+    }
+
+    .guidance-card.rosc {
+      border-color: var(--rosc-cyan);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.35);
+    }
+
+    .guidance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .guidance-tag {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .guidance-title {
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .guidance-desc {
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .guidance-hint {
+      background: var(--surface-elevated);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }
+
+    /* 3. 現場處置操作鍵盤 */
+    .action-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-btn {
+      flex: 1;
+      border: none;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .action-btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-shock {
+      background: var(--urgent-red);
+      color: #FFF;
+      height: 64px;
+    }
+
+    .btn-rhythm {
+      background: var(--surface-elevated);
+      color: #FFF;
+      border: 2px solid var(--shock-purple);
+      height: 64px;
+    }
+
+    .btn-epi {
+      background: var(--drug-blue);
+      color: #000;
+      height: 54px;
+    }
+
+    .btn-antiarr {
+      background: var(--surface-elevated);
+      color: #FFF;
+      border: 1px solid var(--drug-blue);
+      height: 54px;
+    }
+
+    .sub-tools-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .tool-tile {
+      background: var(--surface-elevated);
+      border: 1px solid var(--text-muted);
+      border-radius: 10px;
+      padding: 10px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-primary);
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .tool-tile.active {
+      border-color: var(--warning-amber);
+      color: var(--warning-amber);
+      background: rgba(255, 179, 0, 0.15);
+    }
+
+    .tool-tile.set {
+      border-color: var(--cpr-green);
+      color: var(--cpr-green);
+      background: rgba(0, 230, 118, 0.15);
+    }
+
+    /* 底部時間鏈列 */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--surface-elevated);
+      padding: 10px 14px;
+      display: flex;
+      gap: 8px;
+      z-index: 40;
+    }
+
+    .btn-bottom {
+      flex: 1;
+      padding: 10px 6px;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 10px;
+      border: 1px solid var(--text-muted);
+      background: var(--surface-elevated);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .btn-bottom.active {
+      border-color: var(--cpr-green);
+      color: var(--cpr-green);
+    }
+
+    .btn-bottom.line {
+      background: var(--cpr-green);
+      color: #000;
+      border-color: var(--cpr-green);
+      font-weight: 900;
+    }
+
+    /* 彈窗樣式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border-radius: 16px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid var(--surface-elevated);
+    }
+
+    .modal-header {
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--surface-elevated);
+    }
+
+    .modal-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--surface-elevated);
+      display: flex;
+      gap: 10px;
+    }
+
+    .report-textarea {
+      width: 100%;
+      height: 260px;
+      background: var(--bg);
+      color: var(--text-primary);
+      border: 1px solid var(--surface-elevated);
+      border-radius: 8px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12.5px;
+      line-height: 1.4;
+      resize: none;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.85; transform: scale(0.995); }
+      100% { opacity: 1; transform: scale(1.005); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部導航 -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <div class="brand-title">新竹市消防局 OHCA 現場輔助</div>
+        <div class="brand-sub" id="headerSubtitle">金山分隊 | 送往 新竹馬偕 / 新竹台大</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="openEndCaseModal()" title="結束案件存檔">💾</button>
+      <button class="btn-icon" onclick="createNewCaseWeb()" title="建立新案件">➕</button>
+      <button class="btn-icon" onclick="openCaseModal()" title="編輯案件資訊">📋</button>
+      <button class="btn-icon active" id="btnTts" onclick="toggleTts()" title="語音開關">🔊</button>
+      <button class="btn-icon active" id="btnVibrate" onclick="toggleVibrate()" title="震動開關">📳</button>
+    </div>
+  </header>
+
+  <!-- 主畫面 -->
+  <main>
+    <!-- 1. 主計時卡片 -->
+    <div class="timer-card">
+      <div class="timer-top-bar">
+        <div>總急救時間 <span id="totalTimeDisplay">00:00</span></div>
+        <div class="epi-pill" id="epiPill">Epi 尚未給予</div>
+      </div>
+
+      <div class="timer-display">
+        <div class="cycle-badge" id="cycleBadge">第 1 循環</div>
+        <div class="countdown-number" id="countdownDisplay">02:00</div>
+      </div>
+
+      <div id="overtimeNotice" style="display:none; color:var(--urgent-red); font-size:12px; font-weight:bold; text-align:center; margin-bottom:8px;">
+        ⚠️ 2分鐘循環已超時，請下達分析心律指令
+      </div>
+
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBar"></div>
+      </div>
+
+      <div class="timer-controls">
+        <button class="btn-main-cpr" id="btnMainCpr" onclick="handleMainCprToggle()">
+          ▶ 指令下達：開始 CPR
+        </button>
+        <button class="btn-next-cycle" onclick="manualNextCycle()">
+          ⏭ 指令：換手/下循環
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. 動態決策指引卡片 -->
+    <div class="guidance-card" id="guidanceCard">
+      <div class="guidance-header">
+        <span class="guidance-tag" id="guidanceTag">ACLS 下一步指引</span>
+        <button style="background:none; border:none; color:var(--warning-amber); font-weight:bold; cursor:pointer;" onclick="open4H4TModal()">
+          4H4T 檢核 ➔
+        </button>
+      </div>
+      <div class="guidance-title" id="guidanceTitle">等待現場指令</div>
+      <div class="guidance-desc" id="guidanceDesc">Leader 現場下達「開始 CPR」後點擊上方按鈕，即刻啟動 2 分鐘倒數與記錄。</div>
+      <div class="guidance-hint" id="guidanceHint">💡 準備 AED/去顫器、BVM、建立 IV/IO 通路</div>
+    </div>
+
+    <!-- 3. 現場處置操作鍵盤 -->
+    <div class="action-grid">
+      <!-- 電擊與心律分析 -->
+      <div class="btn-row">
+        <button class="action-btn btn-shock" onclick="recordDefibrillation(200)">
+          ⚡ 現場執行電擊 (200J)<br><span style="font-size:12px; font-weight:normal;" id="shockCountText">已電擊 0 次</span>
+        </button>
+        <button class="action-btn btn-rhythm" onclick="openRhythmModal()">
+          🫀 現場 AED 心律分析<br><span style="font-size:12px; color:var(--text-secondary);" id="rhythmText">尚未判定</span>
+        </button>
+      </div>
+
+      <!-- Epinephrine 與抗心律不整 -->
+      <div class="btn-row">
+        <button class="action-btn btn-epi" onclick="recordEpinephrine()">
+          💉 下達 Epi 1mg (<span id="epiCountText">0劑</span>)
+        </button>
+        <button class="action-btn btn-antiarr" onclick="openAntiarrModal()">
+          💊 抗心律藥 (<span id="antiarrCountText">0劑</span>)
+        </button>
+      </div>
+
+      <!-- 裝備快捷列: LUCAS, 呼吸道, 血管, ETCO2 -->
+      <div class="sub-tools-row">
+        <div class="tool-tile" id="tileLucas" onclick="toggleLucas()">
+          <span style="font-size:16px;">🦾</span>
+          <span id="lucasStatusText">LUCAS 上機</span>
+        </div>
+        <div class="tool-tile" id="tileAirway" onclick="openAirwayModal()">
+          <span style="font-size:16px;">🫁</span>
+          <span id="airwayStatusText">呼吸道</span>
+        </div>
+        <div class="tool-tile" id="tileVascular" onclick="openVascularModal()">
+          <span style="font-size:16px;">🩸</span>
+          <span id="vascularStatusText">血管 (IV/IO)</span>
+        </div>
+        <div class="tool-tile" id="tileEtco2" onclick="openEtco2Modal()">
+          <span style="font-size:16px;">📊</span>
+          <span id="etco2StatusText">ETCO2</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 底部固定快捷列 -->
+  <div class="bottom-bar">
+    <button class="btn-bottom" id="btnTransport" onclick="recordTransport()">🚑 送醫出發</button>
+    <button class="btn-bottom" id="btnArrival" onclick="recordArrival()">🏥 抵達醫院</button>
+    <button class="btn-bottom" onclick="openTimelineModal()">📜 時間軸 (<span id="timelineCount">0</span>)</button>
+    <button class="btn-bottom line" onclick="openLineReportModal()">📋 LINE 報告</button>
+  </div>
+
+  <!-- 心律選擇彈窗 -->
+  <div class="modal-overlay" id="rhythmModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🫀 監視器心律波形判定</h3>
+        <button class="btn-icon" onclick="closeModal('rhythmModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="color:var(--urgent-red); font-weight:bold; font-size:13px;">⚡ 可電擊心律 (Shockable)</div>
+        <div class="btn-row">
+          <button class="action-btn" style="background:var(--urgent-red); color:#fff;" onclick="selectRhythm('vf', 'VF (心室顫動)')">VF 心室顫動</button>
+          <button class="action-btn" style="background:var(--urgent-red); color:#fff;" onclick="selectRhythm('pvt', 'pVT (無脈頻脈)')">pVT 無脈心室頻脈</button>
+        </div>
+        <div style="color:var(--warning-amber); font-weight:bold; font-size:13px; margin-top:8px;">🚫 不可電擊心律 (Non-Shockable)</div>
+        <div class="btn-row">
+          <button class="action-btn" style="background:var(--surface-elevated); color:#fff; border:1px solid var(--warning-amber);" onclick="selectRhythm('pea', 'PEA (無脈電氣活動)')">PEA 無脈電氣活動</button>
+          <button class="action-btn" style="background:var(--surface-elevated); color:#fff; border:1px solid var(--text-muted);" onclick="selectRhythm('asystole', 'Asystole (心搏停止)')">Asystole 心搏停止</button>
+        </div>
+        <button class="action-btn" style="background:rgba(0,229,255,0.15); color:var(--rosc-cyan); border:1px solid var(--rosc-cyan); margin-top:6px;" onclick="selectRhythm('rosc', 'ROSC (自發循環恢復)')">
+          🌟 ROSC 捫及頸動脈博動 (自發循環恢復)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 抗心律不整選擇彈窗 -->
+  <div class="modal-overlay" id="antiarrModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>💊 抗心律不整藥物選擇</h3>
+        <button class="btn-icon" onclick="closeModal('antiarrModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <button class="action-btn" style="background:var(--shock-purple); color:#fff;" onclick="recordAmiodarone(300)">Amiodarone 第 1 劑 (300 mg)</button>
+        <button class="action-btn" style="background:rgba(124,77,255,0.7); color:#fff;" onclick="recordAmiodarone(150)">Amiodarone 第 2 劑 (150 mg)</button>
+        <hr style="border:none; border-top:1px solid var(--surface-elevated);">
+        <button class="action-btn" style="background:var(--surface-elevated); color:#fff; border:1px solid var(--text-muted);" onclick="recordLidocaine(100)">Lidocaine (1~1.5 mg/kg, 預設 100mg)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 呼吸道建立彈窗 -->
+  <div class="modal-overlay" id="airwayModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🫁 呼吸道處置記錄</h3>
+        <button class="btn-icon" onclick="closeModal('airwayModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <label>選擇器械：</label>
+        <select id="airwaySelect" style="padding:10px; background:var(--surface-elevated); color:#fff; border-radius:8px; border:1px solid var(--text-muted);">
+          <option value="SGA (i-gel) #4">SGA (i-gel) #4 中等成人</option>
+          <option value="SGA (i-gel) #3">SGA (i-gel) #3 小型成人</option>
+          <option value="SGA (i-gel) #5">SGA (i-gel) #5 大型成人</option>
+          <option value="ETT 氣管內管 7.5mm (視訊喉頭鏡)">ETT 氣管內管 7.5mm (視訊喉頭鏡)</option>
+          <option value="ETT 氣管內管 7.0mm (視訊喉頭鏡)">ETT 氣管內管 7.0mm (視訊喉頭鏡)</option>
+          <option value="BVM 甦醒球面罩通氣">BVM 甦醒球面罩通氣</option>
+        </select>
+        <button class="btn-main-cpr" style="margin-top:10px; font-size:15px; padding:12px;" onclick="confirmAirway()">確認儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 血管通路彈窗 -->
+  <div class="modal-overlay" id="vascularModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🩸 血管通路 (IV / EZ-IO)</h3>
+        <button class="btn-icon" onclick="closeModal('vascularModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <label>選擇通路與穿刺部位：</label>
+        <select id="vascularSelect" style="padding:10px; background:var(--surface-elevated); color:#fff; border-radius:8px; border:1px solid var(--text-muted);">
+          <option value="EZ-IO 骨內針 (右側近端脛骨)">EZ-IO 骨內針 (右側近端脛骨)</option>
+          <option value="EZ-IO 骨內針 (左側近端脛骨)">EZ-IO 骨內針 (左側近端脛骨)</option>
+          <option value="EZ-IO 骨內針 (右側肱骨頭)">EZ-IO 骨內針 (右側肱骨頭)</option>
+          <option value="EZ-IO 骨內針 (左側肱骨頭)">EZ-IO 骨內針 (左側肱骨頭)</option>
+          <option value="周邊靜脈 IV 18G (右手上肢)">周邊靜脈 IV 18G (右手上肢)</option>
+          <option value="周邊靜脈 IV 18G (左手上肢)">周邊靜脈 IV 18G (左手上肢)</option>
+        </select>
+        <button class="btn-main-cpr" style="margin-top:10px; font-size:15px; padding:12px;" onclick="confirmVascular()">確認建立通路</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ETCO2 彈窗 -->
+  <div class="modal-overlay" id="etco2Modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📊 ETCO2 數值監測</h3>
+        <button class="btn-icon" onclick="closeModal('etco2Modal')">✕</button>
+      </div>
+      <div class="modal-body" style="align-items:center;">
+        <div style="font-size:48px; font-weight:900; color:var(--rosc-cyan);" id="etco2ValDisplay">20 mmHg</div>
+        <input type="range" id="etco2Range" min="5" max="70" value="20" style="width:100%; margin:14px 0;" oninput="updateEtco2Val(this.value)">
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+          <button class="btn-icon" onclick="setEtco2Val(15)">15</button>
+          <button class="btn-icon" onclick="setEtco2Val(25)">25</button>
+          <button class="btn-icon" onclick="setEtco2Val(35)">35</button>
+          <button class="btn-icon" onclick="setEtco2Val(45)">45</button>
+          <button class="btn-icon" onclick="setEtco2Val(55)">55</button>
+        </div>
+        <button class="btn-main-cpr" style="width:100%; margin-top:14px; font-size:15px; padding:12px;" onclick="confirmEtco2()">儲存 ETCO2</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4H4T 檢核彈窗 -->
+  <div class="modal-overlay" id="modal4H4T">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📋 4H4T 可逆病因排查</h3>
+        <button class="btn-icon" onclick="closeModal('modal4H4T')">✕</button>
+      </div>
+      <div class="modal-body">
+        <label><input type="checkbox"> 低血容量 (Hypovolemia) - 大量失血/脫水</label>
+        <label><input type="checkbox"> 缺氧 (Hypoxia) - 呼吸道阻塞/確認純氧</label>
+        <label><input type="checkbox"> 酸中毒 (Hydrogen ion) - 代謝酸/過度換氣不足</label>
+        <label><input type="checkbox"> 高/低血鉀 (Hyper/Hypokalemia) - 洗腎病史</label>
+        <label><input type="checkbox"> 低體溫 (Hypothermia) - 評估體溫與保暖</label>
+        <label><input type="checkbox"> 張力性氣胸 (Tension Pneumo) - 單側無呼吸音</label>
+        <label><input type="checkbox"> 心包填塞 (Cardiac Tamponade) - 頸靜脈怒張</label>
+        <label><input type="checkbox"> 毒物中毒 (Toxins) - 藥物過量/農藥</label>
+        <label><input type="checkbox"> 肺/心栓塞 (Thrombosis) - 心肌梗塞/猝死</label>
+        <button class="btn-next-cycle" style="margin-top:10px; width:100%;" onclick="closeModal('modal4H4T')">完成檢核</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 時間軸彈窗 -->
+  <div class="modal-overlay" id="timelineModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📜 現場急救處置時間軸</h3>
+        <button class="btn-icon" onclick="closeModal('timelineModal')">✕</button>
+      </div>
+      <div class="modal-body" id="timelineListContainer">
+        <!-- 動態渲染時間軸列表 -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-main-cpr" style="width:100%; padding:12px;" onclick="closeModal('timelineModal'); openLineReportModal();">
+          📋 產出 LINE 格式報告
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LINE 格式報告彈窗 -->
+  <div class="modal-overlay" id="lineReportModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📋 新竹市消防局 LINE 救護回報</h3>
+        <button class="btn-icon" onclick="closeModal('lineReportModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <textarea class="report-textarea" id="lineReportContent" readonly></textarea>
+        <div id="copySuccessMsg" style="color:var(--cpr-green); font-weight:bold; font-size:13px; text-align:center; display:none;">
+          ✓ 已成功複製到剪貼簿！可直接貼至 LINE 分隊群組
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-main-cpr" style="flex:2; padding:12px;" onclick="copyLineReport()">
+          一鍵複製 LINE 報告
+        </button>
+        <button class="btn-next-cycle" style="flex:1;" onclick="resetCase()">
+          歸檔新案
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 結束案件存檔彈窗 -->
+  <div class="modal-overlay" id="endCaseModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>💾 結束案件並存檔</h3>
+        <button class="btn-icon" onclick="closeModal('endCaseModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-weight:bold; font-size:13px; color:var(--text-primary); margin-bottom:8px;">選擇急救結局：</div>
+        <div class="btn-row" style="flex-direction:column; gap:6px;">
+          <button class="action-btn" id="outcomeRosc" style="background:var(--surface-elevated); border:1px solid var(--rosc-cyan); color:var(--rosc-cyan);" onclick="selectOutcome('🌟 自發循環恢復 (ROSC) 送醫')">🌟 自發循環恢復 (ROSC) 送醫</button>
+          <button class="action-btn" id="outcomeHospital" style="background:var(--surface-elevated); border:1px solid var(--drug-blue); color:var(--drug-blue);" onclick="selectOutcome('🚑 持續 CPR 送抵急診交接')">🚑 持續 CPR 送抵急診交接</button>
+          <button class="action-btn" id="outcomeTor" style="background:var(--surface-elevated); border:1px solid var(--warning-amber); color:var(--warning-amber);" onclick="selectOutcome('🛑 現場終止急救 (TOR / 拒送)')">🛑 現場終止急救 (TOR / 拒送)</button>
+        </div>
+        <div style="margin-top:12px;">
+          <input type="text" id="endCaseNote" placeholder="結束備註 (如：交接醫師、續壓入急救室...)" style="width:100%; box-sizing:border-box; padding:10px; border-radius:8px; border:1px solid var(--surface-elevated); background:var(--surface); color:#fff; font-size:13px;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-next-cycle" style="flex:1;" onclick="confirmEndCase(false)">僅存檔歸檔</button>
+        <button class="btn-main-cpr" style="flex:1;" onclick="confirmEndCase(true)">存檔並開新案</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 案件資訊彈窗 -->
+  <div class="modal-overlay" id="caseModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📋 出勤案件設定</h3>
+        <button class="btn-icon" onclick="closeModal('caseModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <label>出勤分隊：</label>
+        <input id="inputSquad" type="text" value="金山分隊" style="padding:10px; background:var(--surface-elevated); color:#fff; border-radius:8px; border:1px solid var(--text-muted);">
+        <label>出勤同仁：</label>
+        <input id="inputEmt" type="text" placeholder="例：陳同仁、李同仁" style="padding:10px; background:var(--surface-elevated); color:#fff; border-radius:8px; border:1px solid var(--text-muted);">
+        <label>後送醫院：</label>
+        <input id="inputHospital" type="text" value="新竹馬偕紀念醫院" style="padding:10px; background:var(--surface-elevated); color:#fff; border-radius:8px; border:1px solid var(--text-muted);">
+        <button class="btn-main-cpr" style="margin-top:10px; padding:12px;" onclick="saveCaseInfo()">儲存資訊</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 狀態機核心
+    let state = {
+      isRunning: false,
+      isPaused: false,
+      isMuted: false,
+      isVibrateEnabled: true,
+      totalSeconds: 0,
+      cycleSecondsRemaining: 120,
+      currentCycle: 1,
+      epiSecondsRemaining: null,
+      isLucasUsed: false,
+      lucasSeconds: 0,
+      latestRhythm: 'unknown',
+      latestRhythmName: '尚未判定',
+      shocks: [],
+      epis: [],
+      amiodarones: [],
+      lidocaines: [],
+      airway: null,
+      vascular: null,
+      latestEtco2: null,
+      events: [],
+      contactTime: new Date(),
+      cprStartTime: null,
+      transportStartTime: null,
+      hospitalArrivalTime: null,
+      roscTime: null,
+      squadName: "金山分隊",
+      emtNames: "",
+      hospitalName: "新竹馬偕紀念醫院"
+    };
+
+    let timerInterval = null;
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function formatCycleTime(sec) {
+      if (sec < 0) {
+        const overtime = -sec;
+        const m = Math.floor(overtime / 60).toString().padStart(2, '0');
+        const s = (overtime % 60).toString().padStart(2, '0');
+        return `+${m}:${s}`;
+      }
+      return formatTime(sec);
+    }
+
+    function formatClock(d) {
+      if (!d) return '--:--:--';
+      const date = new Date(d);
+      return date.toTimeString().split(' ')[0];
+    }
+
+    // 語音播報
+    function speak(text) {
+      if (state.isMuted) return;
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'zh-TW';
+        utter.rate = 1.0;
+        window.speechSynthesis.speak(utter);
+      }
+    }
+
+    // 觸覺震動
+    function vibrate(pattern) {
+      if (!state.isVibrateEnabled) return;
+      if (navigator.vibrate) {
+        navigator.vibrate(pattern);
+      }
+    }
+
+    function toggleTts() {
+      state.isMuted = !state.isMuted;
+      document.getElementById('btnTts').className = state.isMuted ? 'btn-icon muted' : 'btn-icon active';
+      document.getElementById('btnTts').innerText = state.isMuted ? '🔇' : '🔊';
+    }
+
+    function toggleVibrate() {
+      state.isVibrateEnabled = !state.isVibrateEnabled;
+      document.getElementById('btnVibrate').className = state.isVibrateEnabled ? 'btn-icon active' : 'btn-icon muted';
+    }
+
+    // 計時器循環
+    function handleMainCprToggle() {
+      if (!state.isRunning) {
+        // Leader 指令下達：開始 CPR
+        state.isRunning = true;
+        state.isPaused = false;
+        state.cycleSecondsRemaining = 120;
+        state.cprStartTime = new Date();
+        addEvent('指令下達：開始 CPR', '第 1 循環開始，啟動 2 分鐘倒數');
+        speak('指令下達，開始CPR，第1循環計時啟動');
+        vibrate([200]);
+        document.getElementById('btnMainCpr').innerText = '⏸ 指令：暫停按壓';
+        document.getElementById('btnMainCpr').classList.add('btn-pause-cpr');
+
+        clearInterval(timerInterval);
+        timerInterval = setInterval(tick, 1000);
+      } else {
+        // 暫停或恢復
+        if (!state.isPaused) {
+          state.isPaused = true;
+          addEvent('指令下達：暫停按壓', '現場中斷按壓');
+          vibrate([300, 100, 300]);
+          document.getElementById('btnMainCpr').innerText = '▶ 指令：恢復按壓';
+          document.getElementById('btnMainCpr').classList.remove('btn-pause-cpr');
+        } else {
+          state.isPaused = false;
+          // 若是在電擊後或超時後恢復，重置 120 秒倒數
+          if (state.lastAction === 'shock' || state.cycleSecondsRemaining <= 0) {
+            state.cycleSecondsRemaining = 120;
+            state.currentCycle++;
+            addEvent(`指令下達：恢復按壓 (第 ${state.currentCycle} 循環)`, 'Leader 下達按壓指令，重啟 2 分鐘倒數');
+            speak(`指令下達，恢復按壓，開始第 ${state.currentCycle} 循環`);
+          } else {
+            addEvent('指令下達：恢復按壓', `繼續第 ${state.currentCycle} 循環`);
+            speak('恢復按壓');
+          }
+          state.lastAction = null;
+          vibrate([200]);
+          document.getElementById('btnMainCpr').innerText = '⏸ 指令：暫停按壓';
+          document.getElementById('btnMainCpr').classList.add('btn-pause-cpr');
+        }
+      }
+      updateUI();
+    }
+
+    function tick() {
+      if (!state.isRunning || state.isPaused) return;
+
+      state.totalSeconds++;
+      if (state.isLucasUsed) state.lucasSeconds++;
+
+      // 倒數 2 分鐘，若歸零後繼續累計超時秒數
+      state.cycleSecondsRemaining--;
+
+      if (state.epiSecondsRemaining !== null && state.epiSecondsRemaining > 0) {
+        state.epiSecondsRemaining--;
+      }
+
+      // 關鍵提醒點
+      if (state.cycleSecondsRemaining === 30) {
+        speak('注意，距離下次分析心律剩 30 秒，請準備換手');
+        vibrate([200, 100, 200]);
+      } else if (state.cycleSecondsRemaining === 0) {
+        speak('2分鐘循環時間已到，請下達停止按壓分析心律指令');
+        vibrate([500, 150, 500, 150, 500]);
+      } else if (state.cycleSecondsRemaining < 0 && state.cycleSecondsRemaining % 30 === 0) {
+        const overtime = -state.cycleSecondsRemaining;
+        speak(`CPR 已超時 ${overtime} 秒，請下達分析心律指令`);
+        vibrate([500, 150, 500]);
+      }
+
+      if (state.epiSecondsRemaining === 30) {
+        speak('Epinephrine 剩 30 秒可給予');
+      } else if (state.epiSecondsRemaining === 0) {
+        speak('可下達下一劑 Epinephrine 指令');
+        vibrate([300, 100, 300]);
+      }
+
+      updateUI();
+    }
+
+    function manualNextCycle() {
+      state.currentCycle++;
+      state.cycleSecondsRemaining = 120;
+      state.isPaused = false;
+      state.isRunning = true;
+      state.lastAction = null;
+      addEvent(`指令下達：進入第 ${state.currentCycle} 循環`, 'Leader 下達換手/下循環指令，啟動 2 分鐘倒數');
+      speak(`指令下達，開始第 ${state.currentCycle} 循環 CPR`);
+      vibrate([200]);
+      document.getElementById('btnMainCpr').innerText = '⏸ 指令：暫停按壓';
+      document.getElementById('btnMainCpr').classList.add('btn-pause-cpr');
+      updateUI();
+    }
+
+    function updateUI() {
+      document.getElementById('totalTimeDisplay').innerText = formatTime(state.totalSeconds);
+      document.getElementById('countdownDisplay').innerText = formatCycleTime(state.cycleSecondsRemaining);
+      document.getElementById('cycleBadge').innerText = `第 ${state.currentCycle} 循環`;
+
+      // 超時警示標籤
+      const notice = document.getElementById('overtimeNotice');
+      if (state.cycleSecondsRemaining < 0) {
+        notice.style.display = 'block';
+        notice.innerText = `⚠️ 2分鐘循環已超時 (超時 ${-state.cycleSecondsRemaining} 秒)，請下達分析心律指令`;
+      } else {
+        notice.style.display = 'none';
+      }
+
+      // 進度條
+      const pct = Math.min(100, Math.max(0, ((120 - state.cycleSecondsRemaining) / 120) * 100));
+      const pBar = document.getElementById('progressBar');
+      pBar.style.width = pct + '%';
+
+      // 顏色切換
+      const countEl = document.getElementById('countdownDisplay');
+      if (state.cycleSecondsRemaining <= 0) {
+        countEl.style.color = 'var(--urgent-red)';
+        pBar.style.backgroundColor = 'var(--urgent-red)';
+      } else if (state.cycleSecondsRemaining <= 30) {
+        countEl.style.color = 'var(--warning-amber)';
+        pBar.style.backgroundColor = 'var(--warning-amber)';
+      } else {
+        countEl.style.color = 'var(--cpr-green)';
+        pBar.style.backgroundColor = 'var(--cpr-green)';
+      }
+
+      // Epi 膠囊
+      const epiPill = document.getElementById('epiPill');
+      if (state.epiSecondsRemaining !== null) {
+        if (state.epiSecondsRemaining > 0) {
+          epiPill.className = 'epi-pill';
+          epiPill.innerText = `Epi 下劑 ${formatTime(state.epiSecondsRemaining)}`;
+        } else {
+          epiPill.className = 'epi-pill ready';
+          epiPill.innerText = `⚡ 可給予 Epi 1mg`;
+        }
+      }
+
+      // 更新決策卡片
+      updateGuidanceCard();
+
+      // 計數文字
+      document.getElementById('shockCountText').innerText = `已電擊 ${state.shocks.length} 次`;
+      document.getElementById('epiCountText').innerText = `${state.epis.length}劑`;
+      document.getElementById('antiarrCountText').innerText = `${state.amiodarones.length + state.lidocaines.length}劑`;
+      document.getElementById('timelineCount').innerText = state.events.length;
+    }
+
+    function updateGuidanceCard() {
+      const card = document.getElementById('guidanceCard');
+      const title = document.getElementById('guidanceTitle');
+      const desc = document.getElementById('guidanceDesc');
+      const hint = document.getElementById('guidanceHint');
+
+      if (state.roscTime) {
+        card.className = 'guidance-card rosc';
+        title.innerText = '🌟 自發循環已恢復 (ROSC)';
+        desc.innerText = '持續監測生命徵象 (BP/SPO2/ETCO2)，維持氣道暢通並後送急診。';
+        hint.innerText = '💡 連續監測波形，做好隨時再次 CPR 之準備。';
+        return;
+      }
+
+      if (state.lastAction === 'shock') {
+        card.className = 'guidance-card critical';
+        title.innerText = '⚡ 電擊已完成！請下達「立即恢復按壓」';
+        desc.innerText = '確認電擊放電完畢，立即全體人員恢復高質量胸外按壓！';
+        hint.innerText = '💡 下達指令後點擊上方「恢復按壓 / 開始下一循環」重啟 2 分鐘倒數。';
+        return;
+      }
+
+      if (state.isPaused) {
+        card.className = 'guidance-card warning';
+        title.innerText = '⏸️ 壓胸暫停中 (現場分析 / 換手)';
+        desc.innerText = '現場等待 Leader 下達「恢復按壓」或「電擊」指令。';
+        hint.innerText = '💡 盡快重啟按壓，中斷時間盡量小於 10 秒。';
+        return;
+      }
+
+      if (state.cycleSecondsRemaining <= 0) {
+        card.className = 'guidance-card critical';
+        const ot = -state.cycleSecondsRemaining;
+        title.innerText = `⚠️ 2分鐘已滿${ot > 0 ? ` (已超時 ${ot} 秒)` : ''}！請下達分析心律指令`;
+        desc.innerText = '等待現場指令：Leader 下達「停止按壓」並於下方點擊「心律波形分析」。';
+        hint.innerText = '💡 若現場已換手，請點擊「換手/下循環」重啟 2 分鐘倒數。';
+        return;
+      }
+
+      if (state.cycleSecondsRemaining <= 30) {
+        card.className = 'guidance-card warning';
+        title.innerText = `⏳ 倒數 ${state.cycleSecondsRemaining} 秒！請準備換手`;
+        desc.innerText = '第二位按壓員就位，若手動去顫器可提前充電，保持按壓不中斷。';
+        hint.innerText = '💡 預告心律波形分析與安全環境確認。';
+        return;
+      }
+
+      if (state.latestRhythm === 'vf' || state.latestRhythm === 'pvt') {
+        card.className = 'guidance-card';
+        if (state.shocks.length === 1) {
+          title.innerText = '⚡ VF/pVT：已第 1 次電擊，持續 CPR';
+          desc.innerText = '維持高質量壓胸 (100-120bpm，5-6cm)，建立 IV/IO 通路。';
+          hint.innerText = '💡 準備第 2 次電擊能量與 Epinephrine 1mg。';
+        } else if (state.shocks.length >= 2 && state.amiodarones.length === 0) {
+          card.className = 'guidance-card warning';
+          title.innerText = '💉 電擊 2 次後：建議給予 Amiodarone 300mg';
+          desc.innerText = '或給予 Lidocaine 1~1.5mg/kg，同時可給予第 1 劑 Epinephrine 1mg。';
+          hint.innerText = '💡 建立高級呼吸道 SGA (i-gel) 或 ETT 插管。';
+        } else {
+          title.innerText = '⚡ 持續可電擊心律：維持高質量 CPR 循環';
+          desc.innerText = '電擊 3 次後若仍為 VF/pVT，可給予 Amiodarone 第 2 劑 (150mg)。';
+          hint.innerText = '💡 檢視電極片黏貼位置與 4H4T。';
+        }
+        return;
+      }
+
+      if (state.latestRhythm === 'pea' || state.latestRhythm === 'asystole') {
+        card.className = 'guidance-card warning';
+        if (state.epis.length === 0) {
+          title.innerText = '🚨 PEA/Asystole 不可電擊心律：首要儘速給予 Epinephrine 1mg';
+          desc.innerText = '立即恢復按壓！盡速建立 IV 或 EZ-IO 骨針通路，推注 1mg + 20ml NS。';
+          hint.innerText = '💡 立即排查可逆病因 4H4T (低血容、缺氧、酸中毒、氣胸)。';
+        } else {
+          card.className = 'guidance-card';
+          title.innerText = '🫀 PEA/Asystole：持續 CPR 並每 3-5 分鐘給予 Epi';
+          desc.innerText = '建立高級呼吸道 (i-gel/ETT)，監測 ETCO2 (>10-20mmHg 評估按壓品質)。';
+          hint.innerText = '💡 排查 4H4T 可逆病因。';
+        }
+        return;
+      }
+
+      // 預設
+      card.className = 'guidance-card';
+      title.innerText = `🟢 第 ${state.currentCycle} 循環 CPR 進行中`;
+      desc.innerText = `維持速率 100-120 bpm、深度 5-6 cm，胸回彈完全。剩餘 ${state.cycleSecondsRemaining}s。`;
+      hint.innerText = state.airway ? `💡 呼吸道：${state.airway}` : '💡 建議儘速建立高級呼吸道 (i-gel) 連接 ETCO2';
+    }
+
+    // 處置動作
+    function recordDefibrillation(j) {
+      const count = state.shocks.length + 1;
+      state.shocks.push({ time: new Date(), energy: j });
+      state.lastAction = 'shock';
+      state.isPaused = true; // 電擊後保持暫停，等待 Leader 下達恢復按壓
+
+      addEvent(`現場執行電擊第 ${count} 次 (${j} J)`, `Leader 執行電擊，雙相波 ${j} 焦耳`);
+      speak(`第 ${count} 次電擊已記錄，請立即下達恢復按壓指令！`);
+      vibrate([500, 150, 500]);
+
+      document.getElementById('btnMainCpr').innerText = '▶ 指令：恢復按壓';
+      document.getElementById('btnMainCpr').classList.remove('btn-pause-cpr');
+
+      updateUI();
+    }
+
+    function recordEpinephrine() {
+      const count = state.epis.length + 1;
+      state.epis.push({ time: new Date(), dose: 1.0 });
+      state.epiSecondsRemaining = 240; // 從指令下達當刻啟動 4 分鐘倒數
+      addEvent(`指令下達：給予 Epinephrine 第 ${count} 劑 (1mg)`, 'Leader 下達推藥指令，啟動 4 分鐘倒數');
+      speak(`已記錄第 ${count} 劑 Epinephrine，啟動4分鐘計時`);
+      vibrate([200]);
+      updateUI();
+    }
+
+    function recordAmiodarone(dose) {
+      closeModal('antiarrModal');
+      const count = state.amiodarones.length + 1;
+      state.amiodarones.push({ time: new Date(), dose });
+      addEvent(`給予 Amiodarone 第 ${count} 劑 (${dose}mg)`, '靜脈/骨針快速推注');
+      speak(`已記錄 Amiodarone ${dose} 毫克`);
+      vibrate([200]);
+      updateUI();
+    }
+
+    function recordLidocaine(dose) {
+      closeModal('antiarrModal');
+      const count = state.lidocaines.length + 1;
+      state.lidocaines.push({ time: new Date(), dose });
+      addEvent(`給予 Lidocaine 第 ${count} 劑 (${dose}mg)`, '靜脈/骨針推注');
+      speak('已記錄 Lidocaine');
+      vibrate([200]);
+      updateUI();
+    }
+
+    function selectRhythm(code, name) {
+      closeModal('rhythmModal');
+      state.latestRhythm = code;
+      state.latestRhythmName = name;
+      state.isPaused = true; // 現場分析心律時，按壓暫停
+
+      document.getElementById('rhythmText').innerText = name.split(' ')[0];
+      document.getElementById('btnMainCpr').innerText = '▶ 指令：恢復按壓';
+      document.getElementById('btnMainCpr').classList.remove('btn-pause-cpr');
+
+      addEvent(`現場分析心律：${name}`, `Leader 記錄現場分析波形 (第 ${state.currentCycle} 循環)`);
+
+      if (code === 'vf' || code === 'pvt') {
+        speak(`${name.split(' ')[0]}，建議電擊，充電中請繼續按壓`);
+        vibrate([500, 150, 500]);
+      } else if (code === 'rosc') {
+        state.roscTime = new Date();
+        speak('評估自發循環已恢復，ROSC！請持續監測生命徵象');
+        vibrate([500, 200, 500, 200, 500]);
+      } else {
+        speak(`${name.split(' ')[0]}，不建議電擊，請下達立即恢復按壓指令`);
+        vibrate([300, 100, 300]);
+      }
+      updateUI();
+    }
+
+    function toggleLucas() {
+      state.isLucasUsed = !state.isLucasUsed;
+      const tile = document.getElementById('tileLucas');
+      const text = document.getElementById('lucasStatusText');
+      if (state.isLucasUsed) {
+        tile.className = 'tool-tile active';
+        text.innerText = 'LUCAS 運轉中';
+        addEvent('LUCAS 機械按壓上機', '啟動機械式胸外按壓');
+        speak('LUCAS 上機開始按壓');
+      } else {
+        tile.className = 'tool-tile';
+        text.innerText = 'LUCAS 上機';
+        addEvent('LUCAS 機械按壓停機', '轉為徒手按壓或停止');
+        speak('LUCAS 停機');
+      }
+      vibrate([200]);
+    }
+
+    function confirmAirway() {
+      const val = document.getElementById('airwaySelect').value;
+      state.airway = val;
+      document.getElementById('tileAirway').className = 'tool-tile set';
+      document.getElementById('airwayStatusText').innerText = '呼吸道已立';
+      addEvent(`呼吸道建立：${val}`, '連接 BVM 與 ETCO2');
+      speak('已記錄呼吸道處置');
+      closeModal('airwayModal');
+      updateUI();
+    }
+
+    function confirmVascular() {
+      const val = document.getElementById('vascularSelect').value;
+      state.vascular = val;
+      document.getElementById('tileVascular').className = 'tool-tile set';
+      document.getElementById('vascularStatusText').innerText = '通路已立';
+      addEvent(`建立血管通路：${val}`, '輸液順暢');
+      speak('已建立通路');
+      closeModal('vascularModal');
+      updateUI();
+    }
+
+    function updateEtco2Val(v) {
+      document.getElementById('etco2ValDisplay').innerText = `${v} mmHg`;
+    }
+
+    function setEtco2Val(v) {
+      document.getElementById('etco2Range').value = v;
+      updateEtco2Val(v);
+    }
+
+    function confirmEtco2() {
+      const v = parseFloat(document.getElementById('etco2Range').value);
+      const prev = state.latestEtco2;
+      state.latestEtco2 = v;
+      document.getElementById('etco2StatusText').innerText = `${v} mmHg`;
+      addEvent(`ETCO2 監測：${v} mmHg`, '呼氣末二氧化碳連續數值');
+
+      if (prev && (v - prev >= 15 || v >= 40)) {
+        speak(`注意！ETCO2 數值顯著回升至 ${v}，請評估是否恢復自主循環！`);
+        vibrate([500, 200, 500]);
+      } else {
+        speak(`ETCO2 ${v}`);
+      }
+      closeModal('etco2Modal');
+      updateUI();
+    }
+
+    function recordTransport() {
+      state.transportStartTime = new Date();
+      document.getElementById('btnTransport').className = 'btn-bottom active';
+      document.getElementById('btnTransport').innerText = '🚑 已出發';
+      addEvent('🚑 送醫出發', `後送醫院：${state.hospitalName}`);
+      speak('送醫出發');
+      vibrate([200]);
+    }
+
+    function recordArrival() {
+      state.hospitalArrivalTime = new Date();
+      document.getElementById('btnArrival').className = 'btn-bottom active';
+      document.getElementById('btnArrival').innerText = '🏥 已抵達';
+      addEvent('🏥 抵達醫院交接', `抵達 ${state.hospitalName} 急診室`);
+      speak('抵達醫院交接');
+      vibrate([200]);
+    }
+
+    function addEvent(title, details = '') {
+      state.events.push({
+        time: new Date(),
+        title,
+        details
+      });
+      document.getElementById('timelineCount').innerText = state.events.length;
+    }
+
+    // LINE 報告產生器
+    function generateLineReport() {
+      const dateStr = new Date().toLocaleDateString('zh-TW');
+      let lines = [];
+      lines.push('【新竹市消防局 OHCA 現場急救紀錄】');
+      lines.push(`案件日期：${dateStr}`);
+      lines.push(`出勤單位：${state.squadName}`);
+      if (state.emtNames) lines.push(`救護人員：${state.emtNames}`);
+      lines.push(`後送醫院：${state.hospitalName}`);
+      lines.push('');
+      lines.push('【⏱️ 關鍵時間鏈】');
+      lines.push(`- 接觸患者：${formatClock(state.contactTime)}`);
+      if (state.cprStartTime) lines.push(`- 開始CPR：${formatClock(state.cprStartTime)}`);
+      if (state.shocks.length > 0) lines.push(`- 首次電擊：${formatClock(state.shocks[0].time)}`);
+      if (state.transportStartTime) lines.push(`- 送醫出發：${formatClock(state.transportStartTime)}`);
+      if (state.hospitalArrivalTime) lines.push(`- 抵達醫院：${formatClock(state.hospitalArrivalTime)}`);
+      if (state.roscTime) lines.push(`- 恢復自發循環 (ROSC)：${formatClock(state.roscTime)} 🌟`);
+      lines.push('');
+      lines.push('【⚡ 處置統計與清單】');
+      lines.push(`- CPR 總歷時：${formatTime(state.totalSeconds)} (共 ${state.currentCycle} 循環)`);
+      if (state.isLucasUsed) {
+        lines.push(`- LUCAS 機械按壓：已使用 (運轉約 ${formatTime(state.lucasSeconds)})`);
+      }
+      if (state.shocks.length > 0) {
+        const shockStr = state.shocks.map(s => `${formatClock(s.time)}(${s.energy}J)`).join('、');
+        lines.push(`- 去顫電擊：共 ${state.shocks.length} 次 [${shockStr}]`);
+      } else {
+        lines.push('- 去顫電擊：0 次 (非可電擊心律)');
+      }
+      if (state.epis.length > 0) {
+        const epiStr = state.epis.map(e => formatClock(e.time)).join('、');
+        lines.push(`- Epinephrine 1mg：共 ${state.epis.length} 劑 [${epiStr}]`);
+      }
+      if (state.amiodarones.length > 0) {
+        const amioStr = state.amiodarones.map(a => `${formatClock(a.time)}(${a.dose}mg)`).join('、');
+        lines.push(`- Amiodarone：共 ${state.amiodarones.length} 劑 [${amioStr}]`);
+      }
+      if (state.airway) lines.push(`- 呼吸道處置：${state.airway}`);
+      if (state.vascular) lines.push(`- 血管通路：${state.vascular}`);
+      if (state.latestEtco2) lines.push(`- ETCO2 最新數值：${state.latestEtco2} mmHg`);
+      lines.push('');
+      lines.push('【📜 詳細處置事件歷程】');
+      state.events.forEach((ev, idx) => {
+        lines.push(`${idx + 1}. [${formatClock(ev.time)}] ${ev.title} ${ev.details ? `(${ev.details})` : ''}`);
+      });
+
+      return lines.join('\n');
+    }
+
+    function openLineReportModal() {
+      const content = generateLineReport();
+      document.getElementById('lineReportContent').value = content;
+      document.getElementById('copySuccessMsg').style.display = 'none';
+      openModal('lineReportModal');
+    }
+
+    function copyLineReport() {
+      const textarea = document.getElementById('lineReportContent');
+      textarea.select();
+      navigator.clipboard.writeText(textarea.value).then(() => {
+        document.getElementById('copySuccessMsg').style.display = 'block';
+        vibrate([200]);
+      });
+    }
+
+    let currentTimelineFilter = 'all';
+
+    function setTimelineFilter(filter) {
+      currentTimelineFilter = filter;
+      renderTimelineView();
+    }
+
+    function openTimelineModal() {
+      currentTimelineFilter = 'all';
+      renderTimelineView();
+      openModal('timelineModal');
+    }
+
+    function renderTimelineView() {
+      const container = document.getElementById('timelineListContainer');
+      container.innerHTML = '';
+
+      // 計算統計資訊
+      const totalShocks = state.events.filter(e => e.type === 'defib').length;
+      const totalEpi = state.events.filter(e => e.type === 'epi').length;
+      const totalAmio = state.events.filter(e => e.type === 'amio').length;
+      const totalLido = state.events.filter(e => e.type === 'lido').length;
+      const totalMeds = totalEpi + totalAmio + totalLido;
+      const cprMinutes = state.cprStartTime ? Math.floor((new Date() - state.cprStartTime) / 60000) : 0;
+      const latestRhythm = state.latestRhythm || '未分析';
+
+      // 1. 交接核心 KPI 看板
+      const kpiHeader = document.createElement('div');
+      kpiHeader.style = 'background:var(--surface); border:1px solid var(--surface-elevated); border-radius:12px; padding:10px; margin-bottom:10px;';
+      kpiHeader.innerHTML = `
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px; margin-bottom:8px;">
+          <div style="background:var(--surface-elevated); border:1px solid rgba(0,230,118,0.3); border-radius:8px; padding:6px 4px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-muted);">⏱️ CPR時長</div>
+            <div style="font-size:14px; font-weight:bold; color:var(--cpr-green);">${cprMinutes}m</div>
+          </div>
+          <div style="background:var(--surface-elevated); border:1px solid rgba(255,23,68,0.3); border-radius:8px; padding:6px 4px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-muted);">⚡ 電擊</div>
+            <div style="font-size:14px; font-weight:bold; color:var(--urgent-red);">${totalShocks}次</div>
+          </div>
+          <div style="background:var(--surface-elevated); border:1px solid rgba(41,182,246,0.3); border-radius:8px; padding:6px 4px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-muted);">💉 強心針</div>
+            <div style="font-size:14px; font-weight:bold; color:var(--drug-blue);">${totalEpi}支</div>
+          </div>
+          <div style="background:var(--surface-elevated); border:1px solid rgba(124,77,255,0.3); border-radius:8px; padding:6px 4px; text-align:center;">
+            <div style="font-size:10px; color:var(--text-muted);">🫀 最新心律</div>
+            <div style="font-size:13px; font-weight:bold; color:var(--shock-purple);">${latestRhythm}</div>
+          </div>
+        </div>
+        <div style="background:var(--surface-elevated); border-radius:6px; padding:5px 8px; font-size:11px; display:flex; justify-content:space-between; color:var(--text-secondary);">
+          <span>🫁 氣道: <b style="color:var(--text-primary);">${state.airwaySummary || 'BVM'}</b></span>
+          <span>🩸 路徑: <b style="color:var(--text-primary);">${state.vascularSummary || '未建立'}</b></span>
+          ${state.latestEtco2 ? `<span>ETCO2: <b style="color:var(--warning-amber);">${state.latestEtco2}</b></span>` : ''}
+        </div>
+      `;
+      container.appendChild(kpiHeader);
+
+      // 2. 篩選標籤
+      const filterBar = document.createElement('div');
+      filterBar.style = 'display:flex; gap:6px; overflow-x:auto; margin-bottom:12px; padding-bottom:4px;';
+      const filters = [
+        { key: 'all', label: `全部 (${state.events.length})` },
+        { key: 'shock', label: `⚡ 電擊 (${totalShocks})` },
+        { key: 'meds', label: `💉 藥物 (${totalMeds})` },
+        { key: 'rhythm', label: `🫀 心律` },
+        { key: 'proc', label: `🛠️ 處置` }
+      ];
+      filters.forEach(f => {
+        const btn = document.createElement('button');
+        const active = currentTimelineFilter === f.key;
+        btn.style = `border-radius:16px; padding:4px 10px; font-size:11px; border:1px solid ${active ? 'var(--cpr-green)' : 'var(--surface-elevated)'}; background:${active ? 'rgba(0,230,118,0.2)' : 'var(--surface)'}; color:${active ? 'var(--cpr-green)' : 'var(--text-secondary)'}; cursor:pointer; white-space:nowrap;`;
+        btn.innerText = f.label;
+        btn.onclick = () => setTimelineFilter(f.key);
+        filterBar.appendChild(btn);
+      });
+      container.appendChild(filterBar);
+
+      // 篩選事件列表
+      let filtered = [...state.events];
+      if (currentTimelineFilter === 'shock') filtered = filtered.filter(e => e.type === 'defib');
+      else if (currentTimelineFilter === 'meds') filtered = filtered.filter(e => ['epi', 'amio', 'lido'].includes(e.type));
+      else if (currentTimelineFilter === 'rhythm') filtered = filtered.filter(e => e.type === 'rhythm');
+      else if (currentTimelineFilter === 'proc') filtered = filtered.filter(e => ['airway', 'vascular', 'etco2', 'lucas_start', 'lucas_stop'].includes(e.type));
+
+      if (filtered.length === 0) {
+        const empty = document.createElement('div');
+        empty.style = 'color:var(--text-muted); text-align:center; padding:30px 10px; font-size:13px;';
+        empty.innerText = '尚無符合篩選的急救事件記錄';
+        container.appendChild(empty);
+        return;
+      }
+
+      // 3. 圖示化軌道時間軸 (倒序排列，最新在上)
+      const listWrapper = document.createElement('div');
+      listWrapper.style = 'display:flex; flex-direction:column; gap:0px;';
+
+      const reversed = [...filtered].reverse();
+      reversed.forEach((ev, idx) => {
+        const baseTime = state.cprStartTime || state.startTime;
+        const diffSec = Math.floor((ev.time - baseTime) / 1000);
+        const m = Math.floor(Math.abs(diffSec) / 60).toString().padStart(2, '0');
+        const s = (Math.abs(diffSec) % 60).toString().padStart(2, '0');
+        const elapsedStr = (diffSec < 0 ? '-' : '+') + `${m}:${s}`;
+
+        // 依類型指定顏色與圖示
+        let icon = '⚪';
+        let accent = 'var(--text-secondary)';
+        if (ev.type === 'defib') { icon = '⚡'; accent = 'var(--urgent-red)'; }
+        else if (ev.type === 'epi' || ev.type === 'amio' || ev.type === 'lido') { icon = '💉'; accent = 'var(--drug-blue)'; }
+        else if (ev.type === 'rhythm') { icon = '🫀'; accent = 'var(--shock-purple)'; }
+        else if (ev.type === 'rosc') { icon = '🌟'; accent = 'var(--rosc-cyan)'; }
+        else if (ev.type === 'airway' || ev.type === 'vascular') { icon = '🛠️'; accent = 'var(--cpr-green)'; }
+        else if (ev.type === 'cpr_start' || ev.type === 'cpr_resume') { icon = '▶️'; accent = 'var(--cpr-green)'; }
+        else if (ev.type === 'cpr_pause') { icon = '⏸️'; accent = 'var(--warning-amber)'; }
+
+        const row = document.createElement('div');
+        row.style = 'display:flex; align-items:stretch; min-height:56px;';
+        row.innerHTML = `
+          <!-- 左欄：相對急救時長 + 鐘錶時間 -->
+          <div style="width:58px; text-align:right; padding-right:8px; display:flex; flex-direction:column; justify-content:center;">
+            <div style="font-family:monospace; font-size:13px; font-weight:bold; color:${accent};">${elapsedStr}</div>
+            <div style="font-size:10px; color:var(--text-muted);">${formatClock(ev.time)}</div>
+          </div>
+          <!-- 中欄：連續軌道線與節點 -->
+          <div style="width:28px; display:flex; flex-direction:column; align-items:center; position:relative;">
+            <div style="width:2px; flex:1; background:${idx === 0 ? 'transparent' : 'var(--surface-elevated)'};"></div>
+            <div style="width:24px; height:24px; border-radius:50%; background:var(--surface); border:2px solid ${accent}; display:flex; align-items:center; justify-content:center; font-size:12px; box-shadow:0 0 6px ${accent};">
+              ${icon}
+            </div>
+            <div style="width:2px; flex:1; background:${idx === reversed.length - 1 ? 'transparent' : 'var(--surface-elevated)'};"></div>
+          </div>
+          <!-- 右欄：處置內容卡片 -->
+          <div style="flex:1; margin:4px 0 4px 8px; background:var(--surface); border:1px solid ${accent}44; border-radius:10px; padding:8px 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-weight:bold; font-size:13px; color:var(--text-primary);">${ev.title}</span>
+              <span style="font-size:10px; background:${accent}22; color:${accent}; padding:2px 6px; border-radius:4px; font-weight:bold;">${icon} 紀錄</span>
+            </div>
+            ${ev.details ? `<div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">${ev.details}</div>` : ''}
+          </div>
+        `;
+        listWrapper.appendChild(row);
+      });
+      container.appendChild(listWrapper);
+    }
+
+    let selectedOutcome = '🌟 自發循環恢復 (ROSC) 送醫';
+
+    function openEndCaseModal() {
+      if (state.roscTime) {
+        selectedOutcome = '🌟 自發循環恢復 (ROSC) 送醫';
+      } else if (state.hospitalArrivalTime) {
+        selectedOutcome = '🚑 持續 CPR 送抵急診交接';
+      }
+      selectOutcome(selectedOutcome);
+      openModal('endCaseModal');
+    }
+
+    function selectOutcome(outcome) {
+      selectedOutcome = outcome;
+      const map = {
+        '🌟 自發循環恢復 (ROSC) 送醫': 'outcomeRosc',
+        '🚑 持續 CPR 送抵急診交接': 'outcomeHospital',
+        '🛑 現場終止急救 (TOR / 拒送)': 'outcomeTor'
+      };
+      ['outcomeRosc', 'outcomeHospital', 'outcomeTor'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.background = 'var(--surface-elevated)';
+      });
+      const activeEl = document.getElementById(map[outcome]);
+      if (activeEl) {
+        activeEl.style.background = 'rgba(0, 230, 118, 0.2)';
+      }
+    }
+
+    function confirmEndCase(startNew) {
+      const note = document.getElementById('endCaseNote').value.trim();
+      addEvent('end_case', `🏁 結束案件：${selectedOutcome}`, note);
+
+      // 保存至歷史紀錄
+      try {
+        const history = JSON.parse(localStorage.getItem('ohca_session_history') || '[]');
+        const record = {
+          id: 'case_' + Date.now(),
+          time: new Date().toISOString(),
+          squadName: state.squadName,
+          hospitalName: state.hospitalName,
+          events: state.events,
+          outcome: selectedOutcome,
+          shocks: state.events.filter(e => e.type === 'defib').length,
+          epi: state.events.filter(e => e.type === 'epi').length,
+        };
+        history.unshift(record);
+        localStorage.setItem('ohca_session_history', JSON.stringify(history.slice(0, 50)));
+      } catch (e) {
+        console.error(e);
+      }
+
+      closeModal('endCaseModal');
+      alert(`案件已成功結束並封存至歷史紀錄！\n結局：${selectedOutcome}`);
+
+      if (startNew) {
+        clearInterval(timerInterval);
+        location.reload();
+      }
+    }
+
+    function createNewCaseWeb() {
+      if (state.events.length > 0) {
+        if (confirm(`目前案件已有 ${state.events.length} 筆急救處置紀錄。\n\n按「確定」存檔當前案件並開新案，按「取消」直接放棄開新案。`)) {
+          confirmEndCase(true);
+          return;
+        } else {
+          clearInterval(timerInterval);
+          location.reload();
+          return;
+        }
+      }
+      clearInterval(timerInterval);
+      location.reload();
+    }
+
+    function resetCase() {
+      createNewCaseWeb();
+    }
+
+    function openCaseModal() {
+      document.getElementById('inputSquad').value = state.squadName;
+      document.getElementById('inputEmt').value = state.emtNames;
+      document.getElementById('inputHospital').value = state.hospitalName;
+      openModal('caseModal');
+    }
+
+    function saveCaseInfo() {
+      state.squadName = document.getElementById('inputSquad').value.trim() || "金山分隊";
+      state.emtNames = document.getElementById('inputEmt').value.trim();
+      state.hospitalName = document.getElementById('inputHospital').value.trim() || "新竹馬偕紀念醫院";
+      document.getElementById('headerSubtitle').innerText = `${state.squadName} | 送往 ${state.hospitalName}`;
+      closeModal('caseModal');
+    }
+
+    // Modal 控制函式
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function openRhythmModal() { openModal('rhythmModal'); }
+    function openAntiarrModal() { openModal('antiarrModal'); }
+    function openAirwayModal() { openModal('airwayModal'); }
+    function openVascularModal() { openModal('vascularModal'); }
+    function openEtco2Modal() { openModal('etco2Modal'); }
+    function open4H4TModal() { openModal('modal4H4T'); }
+
+    // 註冊 Service Worker 啟用 PWA 桌面安裝與完全離線快取
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => {
+          console.log('SW registration error:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
