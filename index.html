@@ -509,6 +509,9 @@
       </div>
     </div>
     <div class="header-actions">
+      <button class="btn-icon active" id="btnMetronome" onclick="toggleMetronomeWeb()" title="110 BPM 節拍器開關">⏱️ 110</button>
+      <button class="btn-icon" onclick="openCaseHistoryModal()" title="歷史存檔紀錄與叫出案件">📂</button>
+      <button class="btn-icon" onclick="openAclsGuideModal()" title="ACLS 到院前急救處置指引">📖</button>
       <button class="btn-icon" onclick="openEndCaseModal()" title="結束案件存檔">💾</button>
       <button class="btn-icon" onclick="createNewCaseWeb()" title="建立新案件">➕</button>
       <button class="btn-icon" onclick="openCaseModal()" title="編輯案件資訊">📋</button>
@@ -523,7 +526,12 @@
     <div class="timer-card">
       <div class="timer-top-bar">
         <div>總急救時間 <span id="totalTimeDisplay">00:00</span></div>
-        <div class="epi-pill" id="epiPill">Epi 尚未給予</div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button class="tool-tile set" id="metronomeChip" style="padding:3px 8px; font-size:11px; cursor:pointer;" onclick="toggleMetronomeWeb()">
+            🎵 110 bpm
+          </button>
+          <div class="epi-pill" id="epiPill">Epi 尚未給予</div>
+        </div>
       </div>
 
       <div class="timer-display">
@@ -553,9 +561,14 @@
     <div class="guidance-card" id="guidanceCard">
       <div class="guidance-header">
         <span class="guidance-tag" id="guidanceTag">ACLS 下一步指引</span>
-        <button style="background:none; border:none; color:var(--warning-amber); font-weight:bold; cursor:pointer;" onclick="open4H4TModal()">
-          4H4T 檢核 ➔
-        </button>
+        <div style="display:flex; gap:10px;">
+          <button style="background:none; border:none; color:var(--drug-blue); font-weight:bold; cursor:pointer; font-size:13px;" onclick="openAclsGuideModal()">
+            📖 流程指南 ➔
+          </button>
+          <button style="background:none; border:none; color:var(--warning-amber); font-weight:bold; cursor:pointer; font-size:13px;" onclick="open4H4TModal()">
+            4H4T 檢核 ➔
+          </button>
+        </div>
       </div>
       <div class="guidance-title" id="guidanceTitle">等待現場指令</div>
       <div class="guidance-desc" id="guidanceDesc">Leader 現場下達「開始 CPR」後點擊上方按鈕，即刻啟動 2 分鐘倒數與記錄。</div>
@@ -829,6 +842,81 @@
     </div>
   </div>
 
+  <!-- 歷史存檔案件彈窗 (可叫出案件) -->
+  <div class="modal-overlay" id="caseHistoryModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>📂 歷史存檔案件紀錄</h3>
+        <button class="btn-icon" onclick="closeModal('caseHistoryModal')">✕</button>
+      </div>
+      <div class="modal-body" id="caseHistoryList">
+        <!-- 動態渲染歷史紀錄列表 -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-icon" style="flex:1; padding:10px;" onclick="closeModal('caseHistoryModal')">關閉</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACLS 到院前急救處置流程指引彈窗 -->
+  <div class="modal-overlay" id="aclsGuideModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>📖 ACLS 到院前急救處置流程指引</h3>
+          <div style="font-size:11px; color:var(--text-secondary);">金山分隊 OHCA 現場決策對照表</div>
+        </div>
+        <button class="btn-icon" onclick="closeModal('aclsGuideModal')">✕</button>
+      </div>
+      <div class="modal-body" style="gap:12px; font-size:13px; line-height:1.5;">
+        <!-- 1. 可電擊心律分支 -->
+        <div style="background:var(--surface-elevated); border:1px solid rgba(255,23,68,0.5); border-radius:10px; padding:12px;">
+          <div style="color:var(--urgent-red); font-weight:bold; font-size:14px; margin-bottom:6px;">⚡ 可電擊心律：VF (心室顫動) / pVT (無脈頻脈)</div>
+          <div style="color:var(--text-secondary);">1. 立即執行 <b>去顫電擊</b> (雙相波 200J)。</div>
+          <div style="color:var(--text-secondary);">2. 電擊後立即下達<b>「恢復 CPR 按壓 2 分鐘」</b>，不需先量脈搏。</div>
+          <div style="color:var(--text-secondary);">3. 建立 <b>血管通路</b> (IV / EZ-IO 骨內針) 與 <b>高級呼吸道</b> (i-gel / 插管)。</div>
+          <div style="color:var(--text-secondary);">4. 第 2 次電擊後：給予 <b>Epinephrine 1mg IV/IO</b> (每 3~5 分鐘重複)。</div>
+          <div style="color:var(--text-secondary);">5. 第 3 次電擊後：給予 抗心律不整藥物 <b>Amiodarone 首劑 300mg</b> (次劑 150mg) 或 <b>Lidocaine 100mg</b>。</div>
+          <div style="color:var(--text-secondary);">6. 持續排查 <b>4H4T</b> 可逆病因。</div>
+        </div>
+
+        <!-- 2. 不可電擊心律分支 -->
+        <div style="background:var(--surface-elevated); border:1px solid rgba(255,179,0,0.5); border-radius:10px; padding:12px;">
+          <div style="color:var(--warning-amber); font-weight:bold; font-size:14px; margin-bottom:6px;">🚫 不可電擊心律：Asystole (心搏停止) / PEA (無脈電氣活動)</div>
+          <div style="color:var(--text-secondary);">1. 立即恢復高品質 CPR 按壓 2 分鐘，<b>不可電擊</b>。</div>
+          <div style="color:var(--text-secondary);">2. 儘速給予 <b>Epinephrine 1mg IV/IO</b> (越快越好，每 3~5 分鐘一次)。</div>
+          <div style="color:var(--text-secondary);">3. 儘早建立 <b>高級呼吸道</b> (SGA i-gel / ETT) 並接上 ETCO2。</div>
+          <div style="color:var(--text-secondary);">4. 積極尋找並處置 <b>4H4T</b>（低血容量、缺氧、張力性氣胸、高血鉀等）。</div>
+          <div style="color:var(--text-secondary);">5. 每 2 分鐘循環評估心律與脈搏。</div>
+        </div>
+
+        <!-- 3. ROSC 自發循環恢復處置 -->
+        <div style="background:var(--surface-elevated); border:1px solid rgba(0,229,255,0.5); border-radius:10px; padding:12px;">
+          <div style="color:var(--rosc-cyan); font-weight:bold; font-size:14px; margin-bottom:6px;">🌟 自發循環恢復 (ROSC) 復甦後照護</div>
+          <div style="color:var(--text-secondary);">1. 捫及頸動脈博動、ETCO2 突然躍升 (>40 mmHg)。</div>
+          <div style="color:var(--text-secondary);">2. 立即測量生命徵象 (BP, HR, SpO2, 血糖, 體溫)。</div>
+          <div style="color:var(--text-secondary);">3. 維持呼吸道暢通，目標 SpO2 92-98%，避免過度換氣 (10次/分)。</div>
+          <div style="color:var(--text-secondary);">4. 若收縮壓 SBP < 90 mmHg，給予輸液灌流。</div>
+          <div style="color:var(--text-secondary);">5. 儘速完成 12 導程心電圖 (12-Lead ECG)，評估 STEMI。</div>
+          <div style="color:var(--text-secondary);">6. 迅速穩定後送往重度級急救責任醫院。</div>
+        </div>
+
+        <!-- 4. 高品質 CPR 核心要點 -->
+        <div style="background:var(--surface-elevated); border:1px solid rgba(0,230,118,0.5); border-radius:10px; padding:12px;">
+          <div style="color:var(--cpr-green); font-weight:bold; font-size:14px; margin-bottom:6px;">🫀 高品質 CPR 現場五大原則</div>
+          <div style="color:var(--text-secondary);">• <b>按壓速率</b>：100 ~ 120 次/分鐘 (請跟隨 App 110bpm 節拍器)。</div>
+          <div style="color:var(--text-secondary);">• <b>按壓深度</b>：成人至少 5 公分，但不超過 6 公分。</div>
+          <div style="color:var(--text-secondary);">• <b>胸迴彈</b>：每次按壓後完全回彈，切勿倚靠在胸壁上。</div>
+          <div style="color:var(--text-secondary);">• <b>中斷最小化</b>：分析心律與電擊中斷時間控制在 10 秒以內。</div>
+          <div style="color:var(--text-secondary);">• <b>避免過度換氣</b>：進階氣道後每 6 秒給予 1 次吹氣 (10次/分)。</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-main-cpr" style="width:100%; padding:12px;" onclick="closeModal('aclsGuideModal')">我知道了</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // 狀態機核心
     let state = {
@@ -836,6 +924,7 @@
       isPaused: false,
       isMuted: false,
       isVibrateEnabled: true,
+      isMetronomeEnabled: true,
       totalSeconds: 0,
       cycleSecondsRemaining: 120,
       currentCycle: 1,
@@ -870,6 +959,83 @@
     };
 
     let timerInterval = null;
+    let metronomeInterval = null;
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          audioCtx = new AudioContext();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // 播放 880Hz 短促清脆按壓滴答聲
+    function playMetronomeClick() {
+      if (!state.isMetronomeEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+
+        gain.gain.setValueAtTime(0.5, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.05);
+
+        // 伴隨極微弱觸覺反饋
+        if (state.isVibrateEnabled && navigator.vibrate) {
+          navigator.vibrate(15);
+        }
+      } catch (e) {
+        console.error('Metronome click error:', e);
+      }
+    }
+
+    function startMetronomeEngine() {
+      stopMetronomeEngine();
+      if (!state.isMetronomeEnabled) return;
+      playMetronomeClick();
+      // 110 BPM = 60000 / 110 ≈ 545.45 ms
+      metronomeInterval = setInterval(playMetronomeClick, 545);
+    }
+
+    function stopMetronomeEngine() {
+      if (metronomeInterval) {
+        clearInterval(metronomeInterval);
+        metronomeInterval = null;
+      }
+    }
+
+    function toggleMetronomeWeb() {
+      state.isMetronomeEnabled = !state.isMetronomeEnabled;
+      const btn = document.getElementById('btnMetronome');
+      const chip = document.getElementById('metronomeChip');
+      if (btn) btn.className = state.isMetronomeEnabled ? 'btn-icon active' : 'btn-icon muted';
+      if (chip) chip.className = state.isMetronomeEnabled ? 'tool-tile set' : 'tool-tile';
+
+      if (state.isMetronomeEnabled) {
+        getAudioContext();
+        if (state.isRunning && !state.isPaused) {
+          startMetronomeEngine();
+        }
+      } else {
+        stopMetronomeEngine();
+      }
+    }
 
     function formatTime(sec) {
       const m = Math.floor(sec / 60).toString().padStart(2, '0');
@@ -940,10 +1106,12 @@
 
         clearInterval(timerInterval);
         timerInterval = setInterval(tick, 1000);
+        startMetronomeEngine();
       } else {
         // 暫停或恢復
         if (!state.isPaused) {
           state.isPaused = true;
+          stopMetronomeEngine();
           addEvent('指令下達：暫停按壓', '現場中斷按壓');
           vibrate([300, 100, 300]);
           document.getElementById('btnMainCpr').innerText = '▶ 指令：恢復按壓';
@@ -962,6 +1130,7 @@
           }
           state.lastAction = null;
           vibrate([200]);
+          startMetronomeEngine();
           document.getElementById('btnMainCpr').innerText = '⏸ 指令：暫停按壓';
           document.getElementById('btnMainCpr').classList.add('btn-pause-cpr');
         }
@@ -1014,6 +1183,7 @@
       addEvent(`指令下達：進入第 ${state.currentCycle} 循環`, 'Leader 下達換手/下循環指令，啟動 2 分鐘倒數');
       speak(`指令下達，開始第 ${state.currentCycle} 循環 CPR`);
       vibrate([200]);
+      startMetronomeEngine();
       document.getElementById('btnMainCpr').innerText = '⏸ 指令：暫停按壓';
       document.getElementById('btnMainCpr').classList.add('btn-pause-cpr');
       updateUI();
@@ -1602,10 +1772,31 @@
           time: new Date().toISOString(),
           squadName: state.squadName,
           hospitalName: state.hospitalName,
-          events: state.events,
+          emtNames: state.emtNames,
+          location: state.location,
+          patientName: state.patientName,
+          patientGender: state.patientGender,
+          patientAge: state.patientAge,
+          caseStory: state.caseStory,
+          medicalHistory: state.medicalHistory,
+          allergyHistory: state.allergyHistory,
           outcome: selectedOutcome,
-          shocks: state.events.filter(e => e.type === 'defib').length,
-          epi: state.events.filter(e => e.type === 'epi').length,
+          totalSeconds: state.totalSeconds,
+          currentCycle: state.currentCycle,
+          events: state.events,
+          shocks: state.shocks,
+          epis: state.epis,
+          amiodarones: state.amiodarones,
+          lidocaines: state.lidocaines,
+          airway: state.airway,
+          vascular: state.vascular,
+          latestEtco2: state.latestEtco2,
+          isLucasUsed: state.isLucasUsed,
+          lucasSeconds: state.lucasSeconds,
+          cprStartTime: state.cprStartTime,
+          transportStartTime: state.transportStartTime,
+          hospitalArrivalTime: state.hospitalArrivalTime,
+          roscTime: state.roscTime,
         };
         history.unshift(record);
         localStorage.setItem('ohca_session_history', JSON.stringify(history.slice(0, 50)));
@@ -1654,6 +1845,158 @@
       state.hospitalName = document.getElementById('inputHospital').value.trim() || "新竹馬偕紀念醫院";
       document.getElementById('headerSubtitle').innerText = `${state.squadName} | 送往 ${state.hospitalName}`;
       closeModal('caseModal');
+    }
+
+    // 歷史案件檢視與叫出功能
+    function openCaseHistoryModal() {
+      const container = document.getElementById('caseHistoryList');
+      container.innerHTML = '';
+      let history = [];
+      try {
+        history = JSON.parse(localStorage.getItem('ohca_session_history') || '[]');
+      } catch (e) {
+        console.error(e);
+      }
+
+      if (history.length === 0) {
+        container.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:36px 12px; font-size:13px;">尚無存檔之急救案件。<br><span style="font-size:11px;">結束案件存檔後即可在此依日期時間查閱與叫出。</span></div>';
+        openModal('caseHistoryModal');
+        return;
+      }
+
+      history.forEach((rec, idx) => {
+        const d = new Date(rec.time);
+        const dateStr = `${d.getFullYear()}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+        const shocksCount = (rec.shocks && rec.shocks.length) || (rec.events ? rec.events.filter(e => e.type === 'defib').length : 0);
+        const episCount = (rec.epis && rec.epis.length) || (rec.events ? rec.events.filter(e => e.type === 'epi').length : 0);
+        const totalDuration = rec.totalSeconds ? formatTime(rec.totalSeconds) : '--:--';
+        const outcome = rec.outcome || '已存檔案件';
+
+        const card = document.createElement('div');
+        card.style = 'background:var(--surface-elevated); border:1px solid var(--text-muted)44; border-radius:12px; padding:12px; margin-bottom:10px; display:flex; flex-direction:column; gap:8px;';
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:13px; font-weight:bold; color:var(--text-primary); display:flex; align-items:center; gap:6px;">
+              <span>📅 ${dateStr}</span>
+            </div>
+            <span style="font-size:11px; background:rgba(0,230,118,0.15); color:var(--cpr-green); padding:3px 8px; border-radius:6px; font-weight:bold;">
+              ${rec.squadName || '金山91'}
+            </span>
+          </div>
+          <div style="font-size:12px; color:var(--text-secondary); line-height:1.4;">
+            🏥 後送：${rec.hospitalName || '未指定'}<br>
+            🏁 結局：<span style="color:var(--rosc-cyan);">${outcome}</span><br>
+            ⏱️ 歷時：${totalDuration} | ⚡ 電擊：${shocksCount}次 | 💉 Epi：${episCount}劑 | 📜 處置：${(rec.events && rec.events.length) || 0}項
+          </div>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <button class="btn-main-cpr" style="flex:1; padding:8px; font-size:12.5px;" onclick="recallCaseFromHistory('${rec.id}')">
+              📥 叫出此案
+            </button>
+            <button class="btn-icon" style="padding:8px 12px; color:var(--urgent-red);" title="刪除此筆存檔" onclick="deleteCaseFromHistory('${rec.id}')">
+              🗑️
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      openModal('caseHistoryModal');
+    }
+
+    // 叫出案件至主畫面
+    function recallCaseFromHistory(id) {
+      try {
+        const history = JSON.parse(localStorage.getItem('ohca_session_history') || '[]');
+        const record = history.find(r => r.id === id);
+        if (!record) {
+          alert('找不到該存檔案件！');
+          return;
+        }
+
+        if (state.events.length > 0) {
+          if (!confirm(`目前主畫面已有 ${state.events.length} 筆急救處置！\n\n確定要以存檔案件覆蓋目前畫面資料嗎？`)) {
+            return;
+          }
+        }
+
+        // 停止當前計時器與節拍器
+        clearInterval(timerInterval);
+        stopMetronomeEngine();
+
+        // 還原狀態
+        state.isRunning = false;
+        state.isPaused = false;
+        state.totalSeconds = record.totalSeconds || (record.events ? record.events.length * 15 : 0);
+        state.cycleSecondsRemaining = 120;
+        state.currentCycle = record.currentCycle || 1;
+        state.squadName = record.squadName || '金山91';
+        state.hospitalName = record.hospitalName || '新竹馬偕紀念醫院';
+        state.emtNames = record.emtNames || '';
+        state.location = record.location || '';
+        state.patientName = record.patientName || '';
+        state.patientGender = record.patientGender || '男';
+        state.patientAge = record.patientAge || '';
+        state.caseStory = record.caseStory || '';
+        state.medicalHistory = record.medicalHistory || '';
+        state.allergyHistory = record.allergyHistory || '無';
+        state.airway = record.airway || null;
+        state.vascular = record.vascular || null;
+        state.latestEtco2 = record.latestEtco2 || null;
+        state.isLucasUsed = !!record.isLucasUsed;
+        state.lucasSeconds = record.lucasSeconds || 0;
+        state.cprStartTime = record.cprStartTime ? new Date(record.cprStartTime) : null;
+        state.transportStartTime = record.transportStartTime ? new Date(record.transportStartTime) : null;
+        state.hospitalArrivalTime = record.hospitalArrivalTime ? new Date(record.hospitalArrivalTime) : null;
+        state.roscTime = record.roscTime ? new Date(record.roscTime) : null;
+
+        // 還原事件與處置
+        state.events = (record.events || []).map(e => ({
+          ...e,
+          time: new Date(e.time),
+        }));
+        state.shocks = (record.shocks || []).map(s => ({ ...s, time: new Date(s.time) }));
+        state.epis = (record.epis || []).map(e => ({ ...e, time: new Date(e.time) }));
+        state.amiodarones = (record.amiodarones || []).map(a => ({ ...a, time: new Date(a.time) }));
+        state.lidocaines = (record.lidocaines || []).map(l => ({ ...l, time: new Date(l.time) }));
+
+        // 更新介面
+        document.getElementById('headerSubtitle').innerText = `${state.squadName} | 送往 ${state.hospitalName}`;
+        document.getElementById('shockCountText').innerText = `已電擊 ${state.shocks.length} 次`;
+        document.getElementById('epiCountText').innerText = `${state.epis.length}劑`;
+        document.getElementById('antiarrCountText').innerText = `${state.amiodarones.length + state.lidocaines.length}劑`;
+        if (state.airway) document.getElementById('airwayStatusText').innerText = state.airway;
+        if (state.vascular) document.getElementById('vascularStatusText').innerText = state.vascular;
+        if (state.latestEtco2) document.getElementById('etco2StatusText').innerText = `ETCO2: ${state.latestEtco2}`;
+        document.getElementById('btnMainCpr').innerText = '▶ 指令下達：開始 CPR';
+        document.getElementById('btnMainCpr').classList.remove('btn-pause-cpr');
+
+        updateUI();
+        updateTimelineBadge();
+        updateGuidanceCard();
+
+        closeModal('caseHistoryModal');
+        const d = new Date(record.time);
+        alert(`已成功叫出出勤案件！\n存檔時間：${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}\n案件內容已還原，可進行時間軸查閱或重新產出 LINE 報告。`);
+      } catch (e) {
+        console.error(e);
+        alert('叫出案件失敗：' + e.message);
+      }
+    }
+
+    function deleteCaseFromHistory(id) {
+      if (!confirm('確定要刪除這筆歷史存檔案件紀錄嗎？刪除後無法復原。')) return;
+      try {
+        let history = JSON.parse(localStorage.getItem('ohca_session_history') || '[]');
+        history = history.filter(r => r.id !== id);
+        localStorage.setItem('ohca_session_history', JSON.stringify(history));
+        openCaseHistoryModal();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function openAclsGuideModal() {
+      openModal('aclsGuideModal');
     }
 
     // Modal 控制函式
