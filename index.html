@@ -857,9 +857,16 @@
       transportStartTime: null,
       hospitalArrivalTime: null,
       roscTime: null,
-      squadName: "金山分隊",
+      squadName: "金山91",
+      location: "",
+      patientName: "",
+      patientGender: "男",
+      patientAge: "",
+      caseStory: "",
+      medicalHistory: "",
+      allergyHistory: "無",
       emtNames: "",
-      hospitalName: "新竹馬偕紀念醫院"
+      hospitalName: "新竹台大分院"
     };
 
     let timerInterval = null;
@@ -1320,17 +1327,36 @@
       document.getElementById('timelineCount').innerText = state.events.length;
     }
 
-    // LINE 報告產生器
+    // LINE 報告產生器 (金山分隊標準格式)
     function generateLineReport() {
-      const dateStr = new Date().toLocaleDateString('zh-TW');
+      const now = new Date();
+      const dispatchMonth = now.getMonth() + 1;
+      const dispatchDate = now.getDate();
+      const dispatchHours = now.getHours().toString().padStart(2, '0');
+      const dispatchMinutes = now.getMinutes().toString().padStart(2, '0');
+      const timeStr = `${dispatchMonth}月${dispatchDate}日${dispatchHours}時${dispatchMinutes}分`;
+
+      const unit = state.squadName || '金山91';
+      const loc = state.location || '新竹市東區';
+      const pName = state.patientName || '患者';
+      const pGender = state.patientGender ? `${state.patientGender}性` : '性別不詳';
+      const pAge = state.patientAge ? `${state.patientAge}歲` : '年齡不詳';
+
       let lines = [];
-      lines.push('【新竹市消防局 OHCA 現場急救紀錄】');
-      lines.push(`案件日期：${dateStr}`);
-      lines.push(`出勤單位：${state.squadName}`);
-      if (state.emtNames) lines.push(`救護人員：${state.emtNames}`);
-      lines.push(`後送醫院：${state.hospitalName}`);
+      lines.push('金山分隊報告');
+      lines.push(`1.出勤時間：${timeStr}`);
+      lines.push(`2.單位：${unit}`);
+      lines.push('3.救護類別：OHCA-救護');
+      lines.push(`4.地點：${loc}`);
+      lines.push(`5.患者：${pName}，${pGender}，${pAge}`);
+      lines.push('6.案情：');
+      if (state.caseStory) {
+        lines.push(state.caseStory);
+      } else {
+        lines.push('現場患者無意識、無呼吸、無脈搏，立即實施 CPR 及各項急救處置。');
+      }
       lines.push('');
-      lines.push('【⏱️ 關鍵時間鏈】');
+      lines.push('【⏱️ 現場急救處置與時間鏈】');
       lines.push(`- 接觸患者：${formatClock(state.contactTime)}`);
       if (state.cprStartTime) lines.push(`- 開始CPR：${formatClock(state.cprStartTime)}`);
       if (state.shocks.length > 0) lines.push(`- 首次電擊：${formatClock(state.shocks[0].time)}`);
@@ -1338,7 +1364,7 @@
       if (state.hospitalArrivalTime) lines.push(`- 抵達醫院：${formatClock(state.hospitalArrivalTime)}`);
       if (state.roscTime) lines.push(`- 恢復自發循環 (ROSC)：${formatClock(state.roscTime)} 🌟`);
       lines.push('');
-      lines.push('【⚡ 處置統計與清單】');
+      lines.push('【⚡ 處置統計摘要】');
       lines.push(`- CPR 總歷時：${formatTime(state.totalSeconds)} (共 ${state.currentCycle} 循環)`);
       if (state.isLucasUsed) {
         lines.push(`- LUCAS 機械按壓：已使用 (運轉約 ${formatTime(state.lucasSeconds)})`);
@@ -1360,6 +1386,12 @@
       if (state.airway) lines.push(`- 呼吸道處置：${state.airway}`);
       if (state.vascular) lines.push(`- 血管通路：${state.vascular}`);
       if (state.latestEtco2) lines.push(`- ETCO2 最新數值：${state.latestEtco2} mmHg`);
+      lines.push(`${unit}人員持續急救後送往${state.hospitalName}急診室交接。`);
+      lines.push('');
+      lines.push(`7.過去病史：${state.medicalHistory || '不詳'}。`);
+      lines.push(`  過敏史：${state.allergyHistory || '無'}。`);
+      lines.push('8.出勤人員：');
+      lines.push(state.emtNames || '(出勤人員未輸入)');
       lines.push('');
       lines.push('【📜 詳細處置事件歷程】');
       state.events.forEach((ev, idx) => {
