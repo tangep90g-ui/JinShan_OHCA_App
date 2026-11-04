@@ -188,14 +188,21 @@ class CprMasterTimerCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceElevated,
+                  color: isPaused
+                      ? AppColors.warningAmber.withValues(alpha: 0.2)
+                      : AppColors.surfaceElevated,
                   borderRadius: BorderRadius.circular(8),
+                  border: isPaused
+                      ? Border.all(color: AppColors.warningAmber)
+                      : null,
                 ),
                 child: Text(
-                  '第 $currentCycle 循環',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 15,
+                  isPaused ? '第 $currentCycle 循環 (按壓暫停)' : '第 $currentCycle 循環',
+                  style: TextStyle(
+                    color: isPaused
+                        ? AppColors.warningAmber
+                        : AppColors.textPrimary,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -204,7 +211,7 @@ class CprMasterTimerCard extends StatelessWidget {
               Text(
                 _formatCycleTime(cycleSecondsRemaining),
                 style: TextStyle(
-                  color: cycleColor,
+                  color: isPaused ? AppColors.warningAmber : cycleColor,
                   fontSize: 56,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -1,

@@ -141,32 +141,36 @@ class ActiveCprViewModel extends ChangeNotifier {
   void _startTimer() {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!_isRunning || _isPaused) return;
+      if (!_isRunning) return;
 
+      // 總急救時間持續累計（主時間軸絕不因按壓暫停而中斷）
       _totalElapsedSeconds++;
       if (_session.isLucasUsed) {
         _session.lucasSeconds++;
       }
 
-      // 倒數 2 分鐘，若歸零後繼續累計超時秒數
-      _cycleSecondsRemaining--;
-
-      // Epinephrine 倒數計時
+      // Epinephrine 倒數計時（依據主急救時間軸推進，不因暫停按壓停滯）
       if (_epiSecondsRemaining != null && _epiSecondsRemaining! > 0) {
         _epiSecondsRemaining = _epiSecondsRemaining! - 1;
       }
 
-      // 關鍵時間節點提醒 (T-30s, T-0s, 以及超時每 30 秒提醒)
-      if (_cycleSecondsRemaining == 30) {
-        _tts.speak('注意，距離下次分析心律剩 30 秒，請準備換手');
-        _vibration.warningFeedback();
-      } else if (_cycleSecondsRemaining == 0) {
-        _tts.speak('2分鐘循環時間已到，請下達停止按壓分析心律指令');
-        _vibration.urgentFeedback();
-      } else if (_cycleSecondsRemaining < 0 && _cycleSecondsRemaining % 30 == 0) {
-        final overtimeSec = -_cycleSecondsRemaining;
-        _tts.speak('CPR 已超時 $overtimeSec 秒，請下達分析心律指令');
-        _vibration.urgentFeedback();
+      // 若當前處於「按壓暫停」狀態，2分鐘循環倒數暫停，節拍聲停止
+      if (!_isPaused) {
+        // 倒數 2 分鐘循環，若歸零後繼續累計超時秒數
+        _cycleSecondsRemaining--;
+
+        // 關鍵時間節點提醒 (T-30s, T-0s, 以及超時每 30 秒提醒)
+        if (_cycleSecondsRemaining == 30) {
+          _tts.speak('注意，距離下次分析心律剩 30 秒，請準備換手');
+          _vibration.warningFeedback();
+        } else if (_cycleSecondsRemaining == 0) {
+          _tts.speak('2分鐘循環時間已到，請下達停止按壓分析心律指令');
+          _vibration.urgentFeedback();
+        } else if (_cycleSecondsRemaining < 0 && _cycleSecondsRemaining % 30 == 0) {
+          final overtimeSec = -_cycleSecondsRemaining;
+          _tts.speak('CPR 已超時 $overtimeSec 秒，請下達分析心律指令');
+          _vibration.urgentFeedback();
+        }
       }
 
       if (_epiSecondsRemaining == 30) {
