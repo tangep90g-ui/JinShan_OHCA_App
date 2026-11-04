@@ -1139,29 +1139,34 @@
     }
 
     function tick() {
-      if (!state.isRunning || state.isPaused) return;
+      if (!state.isRunning) return;
 
+      // 總急救時間持續累計（主時間軸絕不因按壓暫停而中斷）
       state.totalSeconds++;
       if (state.isLucasUsed) state.lucasSeconds++;
 
-      // 倒數 2 分鐘，若歸零後繼續累計超時秒數
-      state.cycleSecondsRemaining--;
-
+      // Epinephrine 倒數計時（依據主急救時間軸推進，不因暫停按壓停滯）
       if (state.epiSecondsRemaining !== null && state.epiSecondsRemaining > 0) {
         state.epiSecondsRemaining--;
       }
 
-      // 關鍵提醒點
-      if (state.cycleSecondsRemaining === 30) {
-        speak('注意，距離下次分析心律剩 30 秒，請準備換手');
-        vibrate([200, 100, 200]);
-      } else if (state.cycleSecondsRemaining === 0) {
-        speak('2分鐘循環時間已到，請下達停止按壓分析心律指令');
-        vibrate([500, 150, 500, 150, 500]);
-      } else if (state.cycleSecondsRemaining < 0 && state.cycleSecondsRemaining % 30 === 0) {
-        const overtime = -state.cycleSecondsRemaining;
-        speak(`CPR 已超時 ${overtime} 秒，請下達分析心律指令`);
-        vibrate([500, 150, 500]);
+      // 若當前處於「按壓暫停」狀態，2分鐘循環倒數暫停，節拍聲停止
+      if (!state.isPaused) {
+        // 倒數 2 分鐘循環，若歸零後繼續累計超時秒數
+        state.cycleSecondsRemaining--;
+
+        // 關鍵提醒點
+        if (state.cycleSecondsRemaining === 30) {
+          speak('注意，距離下次分析心律剩 30 秒，請準備換手');
+          vibrate([200, 100, 200]);
+        } else if (state.cycleSecondsRemaining === 0) {
+          speak('2分鐘循環時間已到，請下達停止按壓分析心律指令');
+          vibrate([500, 150, 500, 150, 500]);
+        } else if (state.cycleSecondsRemaining < 0 && state.cycleSecondsRemaining % 30 === 0) {
+          const overtime = -state.cycleSecondsRemaining;
+          speak(`CPR 已超時 ${overtime} 秒，請下達分析心律指令`);
+          vibrate([500, 150, 500]);
+        }
       }
 
       if (state.epiSecondsRemaining === 30) {
@@ -1192,7 +1197,9 @@
     function updateUI() {
       document.getElementById('totalTimeDisplay').innerText = formatTime(state.totalSeconds);
       document.getElementById('countdownDisplay').innerText = formatCycleTime(state.cycleSecondsRemaining);
-      document.getElementById('cycleBadge').innerText = `第 ${state.currentCycle} 循環`;
+      document.getElementById('cycleBadge').innerText = state.isPaused
+        ? `第 ${state.currentCycle} 循環 (按壓暫停)`
+        : `第 ${state.currentCycle} 循環`;
 
       // 超時警示標籤
       const notice = document.getElementById('overtimeNotice');
@@ -1210,7 +1217,10 @@
 
       // 顏色切換
       const countEl = document.getElementById('countdownDisplay');
-      if (state.cycleSecondsRemaining <= 0) {
+      if (state.isPaused) {
+        countEl.style.color = 'var(--warning-amber)';
+        pBar.style.backgroundColor = 'var(--warning-amber)';
+      } else if (state.cycleSecondsRemaining <= 0) {
         countEl.style.color = 'var(--urgent-red)';
         pBar.style.backgroundColor = 'var(--urgent-red)';
       } else if (state.cycleSecondsRemaining <= 30) {
