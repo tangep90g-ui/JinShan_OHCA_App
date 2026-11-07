@@ -649,36 +649,72 @@ class ActiveCprScreen extends StatelessWidget {
                       ),
                     ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     child: Row(
                       children: [
+                        // 🌟 ROSC 自發循環恢復按鈕
+                        InkWell(
+                          onTap: viewModel.recordRosc,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+                            decoration: BoxDecoration(
+                              color: session.roscTime != null
+                                  ? AppColors.roscCyan.withValues(alpha: 0.25)
+                                  : AppColors.surfaceElevated,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: session.roscTime != null
+                                    ? AppColors.roscCyan
+                                    : AppColors.roscCyan.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('🌟', style: TextStyle(fontSize: 13)),
+                                SizedBox(width: 3),
+                                Text(
+                                  'ROSC',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.roscCyan,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+
                         // 送醫出發按鈕
                         Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.textPrimary,
-                        side: BorderSide(
-                          color: session.transportStartTime != null
-                              ? AppColors.cprGreen
-                              : AppColors.textMuted,
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.textPrimary,
+                              side: BorderSide(
+                                color: session.transportStartTime != null
+                                    ? AppColors.cprGreen
+                                    : AppColors.textMuted,
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 4),
+                            ),
+                            onPressed: viewModel.recordTransport,
+                            icon: Icon(
+                              Icons.local_shipping,
+                              size: 15,
+                              color: session.transportStartTime != null
+                                  ? AppColors.cprGreen
+                                  : AppColors.textSecondary,
+                            ),
+                            label: Text(
+                              session.transportStartTime != null ? '已出發' : '送醫',
+                              style: const TextStyle(fontSize: 11.5),
+                            ),
+                          ),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
-                      onPressed: viewModel.recordTransport,
-                      icon: Icon(
-                        Icons.local_shipping,
-                        size: 16,
-                        color: session.transportStartTime != null
-                            ? AppColors.cprGreen
-                            : AppColors.textSecondary,
-                      ),
-                      label: Text(
-                        session.transportStartTime != null ? '已出發' : '上車送醫',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
+                        const SizedBox(width: 5),
 
                   // 抵達醫院按鈕
                   Expanded(

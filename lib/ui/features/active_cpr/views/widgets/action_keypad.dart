@@ -245,54 +245,46 @@ class ActionKeypad extends StatelessWidget {
     );
   }
 
+  Widget _buildSectionHeader(String title, IconData icon, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 5),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: FontWeight.bold,
+              color: color,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 第一行：⚡ 去顫電擊 與 🫀 心律分析 (核心主按鈕)
+          // ─── 階段一：心律分析與去顫電擊 (到場立即處置) ───
+          _buildSectionHeader(
+            '① 到場立即判定與去顫',
+            Icons.flash_on_rounded,
+            AppColors.urgentRed,
+          ),
           Row(
             children: [
+              // 1. 心律分析判定 (先分析)
               Expanded(
                 child: SizedBox(
-                  height: 64,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.urgentRed,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    onPressed: () => onDefibrillate(200),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.bolt, size: 28),
-                        const SizedBox(width: 6),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('去顫電擊 (200J)',
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w900)),
-                            Text('已電擊 ${session.totalShocks} 次',
-                                style: const TextStyle(
-                                    fontSize: 12, color: Colors.white70)),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: SizedBox(
-                  height: 64,
+                  height: 62,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.surfaceElevated,
@@ -314,9 +306,9 @@ class ActionKeypad extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('心律分析判定',
+                            const Text('1. 心律分析判定',
                                 style: TextStyle(
-                                    fontSize: 15,
+                                    fontSize: 14.5,
                                     fontWeight: FontWeight.bold)),
                             Text(
                               session.latestRhythm.displayName,
@@ -331,17 +323,256 @@ class ActionKeypad extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
+
+              // 2. 執行去顫電擊 (可電擊波形立即放電)
+              Expanded(
+                child: SizedBox(
+                  height: 62,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.urgentRed,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: () => onDefibrillate(200),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.bolt, size: 28),
+                        const SizedBox(width: 6),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('2. 執行電擊(200J)',
+                                style: TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w900)),
+                            Text('已電擊 ${session.totalShocks} 次',
+                                style: const TextStyle(
+                                    fontSize: 11.5, color: Colors.white70)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 4),
 
-          // 第二行：💉 給予 Epi 1mg 與 💊 抗心律不整藥物
+          // ─── 階段二：高級呼吸道與機械按壓 (第 1~2 循環內建立) ───
+          _buildSectionHeader(
+            '② 進階裝備與氣道支持',
+            Icons.health_and_safety_rounded,
+            AppColors.cprGreen,
+          ),
           Row(
             children: [
+              // 3. LUCAS 機械按壓
               Expanded(
                 child: SizedBox(
-                  height: 56,
+                  height: 54,
+                  child: InkWell(
+                    onTap: onToggleLucas,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: session.isLucasUsed
+                            ? AppColors.warningAmber.withOpacity(0.2)
+                            : AppColors.surfaceElevated,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: session.isLucasUsed
+                              ? AppColors.warningAmber
+                              : AppColors.surfaceElevated,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.precision_manufacturing,
+                            size: 22,
+                            color: session.isLucasUsed
+                                ? AppColors.warningAmber
+                                : AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 8),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                session.isLucasUsed ? 'LUCAS 運轉中' : '3. LUCAS 上機',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: session.isLucasUsed
+                                      ? AppColors.warningAmber
+                                      : AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                session.isLucasUsed ? '機械按壓中' : '點擊切換上機',
+                                style: const TextStyle(
+                                    fontSize: 11, color: AppColors.textMuted),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // 4. 高級呼吸道 (i-gel / 插管)
+              Expanded(
+                child: SizedBox(
+                  height: 54,
+                  child: InkWell(
+                    onTap: onOpenAirwayDialog,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: session.airwaySummary != null
+                            ? AppColors.cprGreen.withOpacity(0.18)
+                            : AppColors.surfaceElevated,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: session.airwaySummary != null
+                              ? AppColors.cprGreen
+                              : AppColors.surfaceElevated,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.air,
+                            size: 22,
+                            color: session.airwaySummary != null
+                                ? AppColors.cprGreen
+                                : AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 8),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('4. 高級呼吸道',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary)),
+                              Text(
+                                session.airwaySummary != null
+                                    ? session.airwaySummary!
+                                    : 'SGA i-gel / 插管',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: session.airwaySummary != null
+                                      ? AppColors.cprGreen
+                                      : AppColors.textMuted,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 4),
+
+          // ─── 階段三：循環給藥與品質監控 (持續急救循環) ───
+          _buildSectionHeader(
+            '③ 通路給藥與品質監控',
+            Icons.medication_liquid_rounded,
+            AppColors.drugBlue,
+          ),
+          // 第一列：5. 血管通路 (IV/IO) + 6. Epinephrine 1mg
+          Row(
+            children: [
+              // 5. 血管通路
+              Expanded(
+                child: SizedBox(
+                  height: 54,
+                  child: InkWell(
+                    onTap: onOpenVascularDialog,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: session.vascularSummary != null
+                            ? AppColors.cprGreen.withOpacity(0.18)
+                            : AppColors.surfaceElevated,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: session.vascularSummary != null
+                              ? AppColors.cprGreen
+                              : AppColors.surfaceElevated,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.water_drop,
+                            size: 20,
+                            color: session.vascularSummary != null
+                                ? AppColors.cprGreen
+                                : AppColors.drugBlue,
+                          ),
+                          const SizedBox(width: 6),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('5. 血管通路',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary)),
+                              Text(
+                                session.vascularSummary != null
+                                    ? '已建立通路'
+                                    : 'IV / EZ-IO 骨針',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: session.vascularSummary != null
+                                      ? AppColors.cprGreen
+                                      : AppColors.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // 6. 給予 Epinephrine 1mg
+              Expanded(
+                child: SizedBox(
+                  height: 54,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.drugBlue,
@@ -349,21 +580,37 @@ class ActionKeypad extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                     ),
                     onPressed: onEpinephrine,
-                    icon: const Icon(Icons.vaccines, size: 24),
-                    label: Text(
-                      'Epi 1mg (已給 ${session.totalEpi} 劑)',
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.bold),
+                    icon: const Icon(Icons.vaccines, size: 20),
+                    label: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('6. Epi 1mg',
+                            style: TextStyle(
+                                fontSize: 13.5, fontWeight: FontWeight.bold)),
+                        Text('已給 ${session.totalEpi} 劑 (每4分)',
+                            style: const TextStyle(
+                                fontSize: 11, color: Colors.black87)),
+                      ],
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // 第二列：7. 抗心律不整藥 (Amio/Lido) + 8. ETCO2 監測
+          Row(
+            children: [
+              // 7. 抗心律不整藥 (Amiodarone / Lidocaine)
               Expanded(
                 child: SizedBox(
-                  height: 56,
+                  height: 52,
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.textPrimary,
@@ -372,195 +619,82 @@ class ActionKeypad extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
                     ),
                     onPressed: () => _showAntiarrhythmicDialog(context),
                     icon: const Icon(Icons.medication,
-                        size: 20, color: AppColors.drugBlue),
-                    label: Text(
-                      '抗心律藥 (${session.totalAmiodarone + session.totalLidocaine}劑)',
-                      style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 10),
-
-          // 第三行：新竹市裝備處置快捷面板 (LUCAS | 呼吸道 | 血管通路 | ETCO2)
-          Row(
-            children: [
-              // LUCAS 按鈕
-              Expanded(
-                child: InkWell(
-                  onTap: onToggleLucas,
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: session.isLucasUsed
-                          ? AppColors.warningAmber.withOpacity(0.2)
-                          : AppColors.surfaceElevated,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: session.isLucasUsed
-                            ? AppColors.warningAmber
-                            : AppColors.textMuted,
-                      ),
-                    ),
-                    child: Column(
+                        size: 18, color: AppColors.drugBlue),
+                    label: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.precision_manufacturing,
-                          size: 18,
-                          color: session.isLucasUsed
-                              ? AppColors.warningAmber
-                              : AppColors.textSecondary,
-                        ),
+                        const Text('7. 抗心律藥',
+                            style: TextStyle(
+                                fontSize: 12.5, fontWeight: FontWeight.bold)),
                         Text(
-                          session.isLucasUsed ? 'LUCAS 運轉中' : 'LUCAS 上機',
-                          style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.bold,
-                            color: session.isLucasUsed
-                                ? AppColors.warningAmber
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-
-              // 呼吸道按鈕
-              Expanded(
-                child: InkWell(
-                  onTap: onOpenAirwayDialog,
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: session.airwaySummary != null
-                          ? AppColors.cprGreen.withOpacity(0.15)
-                          : AppColors.surfaceElevated,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: session.airwaySummary != null
-                            ? AppColors.cprGreen
-                            : AppColors.textMuted,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.air,
-                          size: 18,
-                          color: session.airwaySummary != null
-                              ? AppColors.cprGreen
-                              : AppColors.textSecondary,
-                        ),
-                        Text(
-                          session.airwaySummary != null ? '呼吸道已立' : '呼吸道(SGA/管)',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: session.airwaySummary != null
-                                ? AppColors.cprGreen
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-
-              // 血管通路按鈕
-              Expanded(
-                child: InkWell(
-                  onTap: onOpenVascularDialog,
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: session.vascularSummary != null
-                          ? AppColors.cprGreen.withOpacity(0.15)
-                          : AppColors.surfaceElevated,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: session.vascularSummary != null
-                            ? AppColors.cprGreen
-                            : AppColors.textMuted,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.water_drop,
-                          size: 18,
-                          color: session.vascularSummary != null
-                              ? AppColors.cprGreen
-                              : AppColors.textSecondary,
-                        ),
-                        Text(
-                          session.vascularSummary != null ? '通路已立' : '通路 (IV/IO)',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: session.vascularSummary != null
-                                ? AppColors.cprGreen
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-
-              // ETCO2 按鈕
-              Expanded(
-                child: InkWell(
-                  onTap: onOpenEtco2Dialog,
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceElevated,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.roscCyan),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.waves,
-                            size: 18, color: AppColors.roscCyan),
-                        Text(
-                          session.latestEtco2 != null
-                              ? '${session.latestEtco2!.toInt()} mmHg'
-                              : 'ETCO2 監測',
+                          'Amio/Lido (${session.totalAmiodarone + session.totalLidocaine}劑)',
                           style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.roscCyan,
-                          ),
+                              fontSize: 10.5, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
+
+              // 8. ETCO2 數值監測
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: InkWell(
+                    onTap: onOpenEtco2Dialog,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceElevated,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppColors.roscCyan.withValues(alpha: 0.8),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.waves,
+                              size: 18, color: AppColors.roscCyan),
+                          const SizedBox(width: 6),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('8. ETCO2 監測',
+                                  style: TextStyle(
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textPrimary)),
+                              Text(
+                                session.latestEtco2 != null
+                                    ? '${session.latestEtco2!.toInt()} mmHg'
+                                    : '按壓品質 / ROSC',
+                                style: const TextStyle(
+                                  fontSize: 10.5,
+                                  color: AppColors.roscCyan,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
+          const SizedBox(height: 6),
         ],
       ),
     );
